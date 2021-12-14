@@ -7,10 +7,15 @@ export interface IDevice {
     id: any;
     name: String;
     type: String;
-    description: String;
-    serial?: String
+    description?: String;
 }
 
+
+export interface IDeviceConnetion{
+    id: any
+    device: IDevice
+    connection_string: String // JSON
+}
 
 
 
