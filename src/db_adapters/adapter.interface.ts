@@ -14,3 +14,4 @@ export interface DBObject<T>{
 export interface IDBAdapater {
     Device: DBObject<IDevice>
 }
+
