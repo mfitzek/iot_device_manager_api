@@ -10,21 +10,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model Device {
-  id  Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name String
-  description String?
-  data Telemetry[]
+  id                Int                 @id @default(autoincrement())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  name              String
+  description       String?
+  telemetry         Telemetry[]
+  connection        DeviceConnection?
+  MQTTSubscriptions MQTTSubscriptions[]
 }
 
-model Telemetry{
-  id  Int @id @default(autoincrement())
-  deviceID Int
+model Telemetry {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  device Device @relation(fields: [deviceID], references: [id])
+  deviceID  Int
+  device    Device   @relation(fields: [deviceID], references: [id])
+  data      String
+}
 
+model MQTTSubscriptions {
+  id          Int    @id @default(autoincrement())
+  deviceID    Int
+  device      Device @relation(fields: [deviceID], references: [id])
+  name        String
+  description String
+  topic       String
+}
+
+model DeviceConnection {
+  id               Int            @id @default(autoincrement())
+  deviceID         Int            @unique
+  device           Device         @relation(fields: [deviceID], references: [id])
+  typeID           Int
+  type             ConnectionType @relation(fields: [typeID], references: [id])
+  connectionString String
+}
+
+model ConnectionType {
+  id               Int                @id @default(autoincrement())
+  name             String
+  DeviceConnection DeviceConnection[]
 }

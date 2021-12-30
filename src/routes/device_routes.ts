@@ -9,9 +9,9 @@ const router = Router();
 
 router.get("/", controller.List);
 router.post("/", controller.Insert);
-router.get("/:id", controller.Get);
-router.put("/:id", controller.Update);
-router.delete("/:id", controller.Delete);
+router.get("/:device_id", controller.Get);
+router.patch("/:device_id", controller.Update);
+router.delete("/:device_id", controller.Delete);
 
 
 
