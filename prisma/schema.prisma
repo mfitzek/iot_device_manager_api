@@ -11,14 +11,13 @@ datasource db {
 }
 
 model Device {
-  id                Int                 @id @default(autoincrement())
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  name              String
-  description       String?
-  telemetry         Telemetry[]
-  connection        DeviceConnection?
-  MQTTSubscriptions MQTTSubscriptions[]
+  id          Int               @id @default(autoincrement())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  name        String
+  description String?
+  telemetry   Telemetry[]
+  connection  DeviceConnection?
 }
 
 model Telemetry {
@@ -26,25 +25,28 @@ model Telemetry {
   createdAt DateTime @default(now())
   deviceID  Int
   device    Device   @relation(fields: [deviceID], references: [id])
-  data      String
+  name      String
+  type      String
+  value     String
 }
 
 model MQTTSubscriptions {
-  id          Int    @id @default(autoincrement())
-  deviceID    Int
-  device      Device @relation(fields: [deviceID], references: [id])
-  name        String
-  description String
-  topic       String
+  id                 Int               @id @default(autoincrement())
+  topic              String
+  name               String
+  type               String
+  DeviceConnection   DeviceConnection? @relation(fields: [deviceConnectionId], references: [id])
+  deviceConnectionId Int?
 }
 
 model DeviceConnection {
-  id               Int            @id @default(autoincrement())
-  deviceID         Int            @unique
-  device           Device         @relation(fields: [deviceID], references: [id])
-  typeID           Int
-  type             ConnectionType @relation(fields: [typeID], references: [id])
-  connectionString String
+  id                 Int                 @id @default(autoincrement())
+  deviceID           Int                 @unique
+  device             Device              @relation(fields: [deviceID], references: [id])
+  typeID             Int
+  type               ConnectionType      @relation(fields: [typeID], references: [id])
+  connectionString   String?
+  mqtt_subscriptions MQTTSubscriptions[]
 }
 
 model ConnectionType {

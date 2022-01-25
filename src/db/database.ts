@@ -23,6 +23,7 @@ export default class Database{
     }
 
 
+
     public async GetDevice(id: any, include?: Object){
         let data = await this.prisma.device.findUnique({
             where: {
