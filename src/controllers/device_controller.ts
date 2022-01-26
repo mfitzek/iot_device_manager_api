@@ -21,20 +21,30 @@ const DeviceController = {
 
     async Telemetry(req: Request, res: Response, next: NextFunction){
         
+        const {device_id} = req.params;
         const {attr, date_start, date_end} = req.query;
         
-        let attributes = [];
-
+        let attributes: string[] = [];
+        
+        
         if(Array.isArray(attr)){
-            attributes.push(...attr);
+            for(let a of attr){
+                attributes.push(a.toString());
+            }
         }else if(attr){
-            attributes.push(attr);
+            attributes.push(attr.toString());
         }
 
-        let end = date_end? Date.parse(String(date_end)) : new Date();
-        let start = date_start || null;
 
-        res.json({attr: attributes, start, end} );
+        let end = date_end? new Date(String(date_end)) : new Date();
+        let start = date_start? new Date(String(date_start)) : new Date(0);
+
+        console.log({device_id, attributes, start, end});
+
+       const telemetry = await devices.DeviceTelemetry(device_id, attributes, start, end);
+
+
+        res.json(telemetry);
 
 
     },
@@ -78,7 +88,36 @@ const DeviceController = {
 
         res.json(removed);
 
+    },
+
+
+
+    async GetDeviceAttributes(req: Request,res:Response, next:NextFunction){
+
+        res.send("Not implemented yet!");
+
+    },
+
+    async SetDeviceAttributes(req: Request,res:Response, next:NextFunction){
+        // TODO: insert or update dev attributes
+        res.send("Not implemented yet!");
+
+    },
+
+    async GetDeviceConnection(req: Request,res:Response, next:NextFunction){
+
+        res.send("Not implemented yet!");
+
+    },
+
+    async SetDeviceConnection(req: Request,res:Response, next:NextFunction){
+        // TODO: set device connection
+        res.send("Not implemented yet!");
+
     }
+    
+
+
     
 }
 

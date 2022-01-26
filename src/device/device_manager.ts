@@ -39,7 +39,6 @@ class DeviceManager{
 
 
     async InitManager(){
-        // TODO: Load Devices
 
         const devices = await this.database.device.findMany({
             include : { 
@@ -55,7 +54,6 @@ class DeviceManager{
 
 
         for(let dev of devices){
-            // TODO: If connections, connect device
             if(dev.connection?.type?.name == "mqtt"){
                 const mqtt_con = dev.connection.connectionString? JSON.parse(dev.connection.connectionString): null;
                 const subscriptions = dev.connection.mqtt_subscriptions;
@@ -94,6 +92,14 @@ class DeviceManager{
         let data = await this.database.device.findUnique({
             where: {
                 id: id
+            },
+            include: {
+                connection: {
+                    include: {
+                        type: true,
+                        mqtt_subscriptions: true
+                    }
+                }
             }
         });
         return data;
@@ -101,15 +107,34 @@ class DeviceManager{
 
     async CreateDevice(device: IDevice){
         return await this.database.device.create({
-            data: device
+            data: device,
+            include: {
+                connection: {
+                    include: {
+                        type: true,
+                        mqtt_subscriptions: true
+                    }
+                }
+            }
         });
     }
     
     async UpdateDevice(id: any, device: IDevice) {
         id = Number(id);
-        return await this.database.device.update({where: {
-            id: id
-        }, data: device});
+        return await this.database.device.update({
+            where: {
+                id: id
+            },
+            data: device,
+            include: {
+                connection: {
+                    include: {
+                        type: true,
+                        mqtt_subscriptions: true
+                    }
+                }
+            }
+         });
     }
 
     async DeleteDevice(id: any) {
@@ -119,6 +144,38 @@ class DeviceManager{
         }});
     }
 
+
+
+    async DeviceTelemetry(id: any, attributes: string[], start: Date, end: Date){
+        id = Number(id);
+        
+        if(attributes.length > 0){
+            return await this.database.telemetry.findMany({
+                where: {
+                    deviceID: id,
+                    createdAt: {
+                        gte: start,
+                        lte: end
+                    },
+                    name: {
+                        in: attributes
+                    
+                    }
+                },
+            });
+        }else{
+            return await this.database.telemetry.findMany({
+                where: {
+                    deviceID: id,
+                    createdAt: {
+                        gte: start,
+                        lte: end
+                    }
+                },
+            });
+        }
+
+    }
 
 
 

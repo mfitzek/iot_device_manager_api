@@ -1,5 +1,7 @@
 # IoT Device Manager API server
 
-## VSB-TUO Bachelors project
+Server for storing IoT device data.
+
+Bachelors project
 
 
