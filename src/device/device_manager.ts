@@ -1,12 +1,10 @@
-import {Device, IDevice} from "./device";
-
 import Database from "@db/database"
 import { Gateway, ListenMQTT } from "@/gateway/gateway";
-import {MQTTTopics} from "@/gateway/mqtt_gw";
 
 
 
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma, Device } from "@prisma/client";
+import { IDevice } from "./device";
 
 
 class DeviceManager{
@@ -24,18 +22,12 @@ class DeviceManager{
         this.gateway.on("telemetry", async (telemetry) =>{
 
             const saved = await this.database.telemetry.create({
-                data: {
-                    deviceID: telemetry.device_id,
-                    name: telemetry.name,
-                    type: telemetry.type,
-                    value: telemetry.value
-                }
+                data: telemetry
             });
 
         });
 
     }
-
 
 
     async InitManager(){
@@ -45,10 +37,10 @@ class DeviceManager{
                 connection: 
                 { 
                     include: {
-                        mqtt_subscriptions: true,
                         type: true,
                     }
-                }
+                },
+                mqtt_subscriptions: true
             }
         });
 
@@ -56,18 +48,11 @@ class DeviceManager{
         for(let dev of devices){
             if(dev.connection?.type?.name == "mqtt"){
                 const mqtt_con = dev.connection.connectionString? JSON.parse(dev.connection.connectionString): null;
-                const subscriptions = dev.connection.mqtt_subscriptions;
+                const subscriptions = dev.mqtt_subscriptions;
                 const arg: ListenMQTT = {
                     protocol: "mqtt",
                     uri: mqtt_con.broker,
-                    topics: subscriptions.map((topic: any): MQTTTopics => {
-                        return {
-                            device_id: dev.id,
-                            topic: topic.topic,
-                            name: topic.name,
-                            type: topic.type
-                        }
-                    })
+                    topics: dev.mqtt_subscriptions
                 }
 
                 this.gateway.listen(arg);
@@ -78,17 +63,16 @@ class DeviceManager{
     }
 
 
-
-
     // CRUD Methods 
     async DeviceList(query?: any) {
         let data = await this.database.device.findMany(query);
         return data;
     }
+
+
     async GetDevice(id: any){
 
         id = Number(id);
-
         let data = await this.database.device.findUnique({
             where: {
                 id: id
@@ -97,25 +81,18 @@ class DeviceManager{
                 connection: {
                     include: {
                         type: true,
-                        mqtt_subscriptions: true
                     }
-                }
+                },
+                mqtt_subscriptions: true
             }
         });
         return data;
     }
+    
 
     async CreateDevice(device: IDevice){
         return await this.database.device.create({
             data: device,
-            include: {
-                connection: {
-                    include: {
-                        type: true,
-                        mqtt_subscriptions: true
-                    }
-                }
-            }
         });
     }
     
@@ -126,14 +103,6 @@ class DeviceManager{
                 id: id
             },
             data: device,
-            include: {
-                connection: {
-                    include: {
-                        type: true,
-                        mqtt_subscriptions: true
-                    }
-                }
-            }
          });
     }
 
@@ -157,11 +126,15 @@ class DeviceManager{
                         gte: start,
                         lte: end
                     },
-                    name: {
-                        in: attributes
-                    
+                    attribute: {
+                        name:{
+                            in: attributes
+                        }
                     }
                 },
+                include: {
+                    attribute: true
+                }
             });
         }else{
             return await this.database.telemetry.findMany({
@@ -172,6 +145,9 @@ class DeviceManager{
                         lte: end
                     }
                 },
+                include: {
+                    attribute: true
+                }
             });
         }
 

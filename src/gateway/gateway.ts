@@ -1,5 +1,9 @@
 import EventEmitter from "events";
-import {MQTTTopics, MQTT_Gateway} from "./mqtt_gw";
+import {MQTT_Gateway} from "./mqtt_gw";
+
+import { MQTTSubscriptions } from "@prisma/client";
+
+import { ITelemetry } from "@/device/telemetry/telemetry";
 
 export interface ListenArgs {
     protocol: "mqtt" | "http" | "coap",
@@ -8,18 +12,13 @@ export interface ListenArgs {
 
 export interface ListenMQTT extends ListenArgs {
     uri: string
-    topics: MQTTTopics[]
+    topics: MQTTSubscriptions[]
 }
 
-interface telemetry {
-    device_id: any,
-    name: string,
-    type: "string" | "number" | "boolean" | "object",
-    value: any
-}
+
 
 export declare interface Gateway{
-    on(event: 'telemetry', listener_: (telemetry: telemetry)=> void): this;
+    on(event: 'telemetry', listener_: (telemetry: ITelemetry)=> void): this;
 }
 
 export class Gateway extends EventEmitter{

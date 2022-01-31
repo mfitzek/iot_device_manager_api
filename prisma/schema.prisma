@@ -11,42 +11,62 @@ datasource db {
 }
 
 model Device {
-  id          Int               @id @default(autoincrement())
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  name        String
-  description String?
-  telemetry   Telemetry[]
-  connection  DeviceConnection?
+  id                Int                 @id @default(autoincrement())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  name              String
+  description       String?
+  telemetry         Telemetry[]
+  connection        DeviceConnection?
+  attributes        Attribute[]
+  mqtt_subscriptions MQTTSubscriptions[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  username String @unique
+  password String
+  role     Int    @default(2)
+}
+
+model Attribute {
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  type               String
+  deviceID           Int
+  device             Device              @relation(fields: [deviceID], references: [id])
+  Telemetry          Telemetry[]
+  mqtt_subscriptions MQTTSubscriptions[]
 }
 
 model Telemetry {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  deviceID  Int
-  device    Device   @relation(fields: [deviceID], references: [id])
-  name      String
-  type      String
-  value     String
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  deviceID    Int
+  attributeID Int
+  value       String
+  attribute   Attribute @relation(fields: [attributeID], references: [id])
+  device      Device    @relation(fields: [deviceID], references: [id])
 }
 
 model MQTTSubscriptions {
-  id                 Int               @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   topic              String
-  name               String
-  type               String
-  DeviceConnection   DeviceConnection? @relation(fields: [deviceConnectionId], references: [id])
+  attributeID        Int
+  deviceID           Int
   deviceConnectionId Int?
+  attribute          Attribute @relation(fields: [attributeID], references: [id])
+  device             Device    @relation(fields: [deviceID], references: [id])
 }
 
 model DeviceConnection {
-  id                 Int                 @id @default(autoincrement())
-  deviceID           Int                 @unique
-  device             Device              @relation(fields: [deviceID], references: [id])
-  typeID             Int
-  type               ConnectionType      @relation(fields: [typeID], references: [id])
-  connectionString   String?
-  mqtt_subscriptions MQTTSubscriptions[]
+  id               Int            @id @default(autoincrement())
+  deviceID         Int            @unique
+  typeID           Int
+  connectionString String?
+  type             ConnectionType @relation(fields: [typeID], references: [id])
+  device           Device         @relation(fields: [deviceID], references: [id])
 }
 
 model ConnectionType {

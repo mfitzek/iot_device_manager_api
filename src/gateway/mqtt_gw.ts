@@ -1,25 +1,22 @@
 import EventEmitter from "events";
 import {connect, Client, MqttClient} from "mqtt";
 
+import { MQTTSubscriptions } from "@prisma/client";
+import { ITelemetry } from "@/device/telemetry/telemetry";
+
 import match from "mqtt-match";
 
 
-export interface MQTTTopics {
-    device_id: any
-    topic: string,
-    name: string,
-    type: "string" | "number" | "boolean" | "object"
-}
 
 
 export declare interface MQTT_Gateway{
-    on(event: 'telemetry', listener_: (telemetry: {device_id: any, name: string, value: any})=> void): this;
+    on(event: 'telemetry', listener_: (telemetry: ITelemetry)=> void): this;
 }
 
 export class MQTT_Gateway extends EventEmitter{
 
     client: Client;
-    topics: MQTTTopics[];
+    topics: MQTTSubscriptions[];
 
     public host: string;
 
@@ -44,17 +41,18 @@ export class MQTT_Gateway extends EventEmitter{
             let topics = this.topics.filter(t => match(t.topic, topic));
 
             for(let _topic of topics){
-
-                this.emit("telemetry", {..._topic, value: message.toString()});
-
+                let data: ITelemetry = {
+                    createdAt: new Date(),
+                    deviceID: _topic.deviceID,
+                    attributeID: _topic.attributeID,
+                    value: message.toString()
+                }
+                this.emit("telemetry", data);
             }
-            
-
-
         });
     }
 
-    subscribe(topic: MQTTTopics) {
+    subscribe(topic: MQTTSubscriptions) {
         this.topics.push(topic);
         this.client.subscribe(topic.topic);
     }
