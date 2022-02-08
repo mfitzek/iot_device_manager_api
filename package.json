@@ -4,6 +4,7 @@
   "description": "api server for IoT manager",
   "main": "index.js",
   "scripts": {
+    "dev:init": "npx prisma migrate dev",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:server": "nodemon --watch './**/*.ts' --exec ts-node ./src/index.ts"
