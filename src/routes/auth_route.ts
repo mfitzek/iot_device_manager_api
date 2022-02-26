@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { hash, compare, hash } from "bcrypt";
+import { hash, compare } from "bcrypt";
 
 import Database from "@/db/database";
 
