@@ -1,13 +1,12 @@
 import {Request, Express} from "express";
-
-export interface UserToken {
-    user_id: any,
-    role: Number
-}
+import {UserToken} from "@/types/jwt_auth/index";
 
 
-declare namespace Express {
-    interface Request {
-        user?: UserToken;
+declare global {
+    namespace Express {
+        interface Request {
+            user?: UserToken;
+        }
     }
+
 }

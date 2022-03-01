@@ -2,7 +2,7 @@ import {sign, verify} from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
 
-import { UserToken } from "@/types";
+import { UserToken } from "@/types/jwt_auth";
 
 const secret = process.env.JWT_SECRET?? "dev_test";
 
@@ -18,12 +18,13 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
         throw "Set up JWT_TOKEN";
     }
 
+
     if(token){
-        verify(token, secret, (err, token_user)=>{
+        verify(token, secret, (err: any, token_user: UserToken)=>{
             if(!err){
                 req.user = {
                     user_id: token_user.user_id,
-                    level: token_user.level
+                    role: token_user.role
                 }
             }
         });
