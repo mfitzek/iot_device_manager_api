@@ -20,7 +20,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
 
 
     if(token){
-        verify(token, secret, (err: any, token_user: UserToken)=>{
+        verify(token, secret, (err: any, token_user: any)=>{
             if(!err){
                 req.user = {
                     user_id: token_user.user_id,
@@ -35,6 +35,14 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
 
 export async function signToken(user: UserToken){
 
+    if(secret == "dev_test"){
+        throw "Set up JWT_TOKEN";
+    }
+
+    const token = await sign(user, secret);
+
+    return token;
+    
 }
 
 
