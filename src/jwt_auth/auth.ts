@@ -39,7 +39,7 @@ export async function signToken(user: UserToken){
         throw "Set up JWT_TOKEN";
     }
 
-    const token = await sign(user, secret);
+    const token = await sign(user, secret, {expiresIn: "1hr"});
 
     return token;
     
