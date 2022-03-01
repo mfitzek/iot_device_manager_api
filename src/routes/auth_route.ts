@@ -51,10 +51,6 @@ router.post("/login", async (req, res, next)=>{
 });
 
 
-router.post("/logout", async (req,res,next)=>{
-    // TODO: Logout
-});
-
 router.post("/signup", async (req, res, next)=>{
 
     const {email, username, password} = req.body;
