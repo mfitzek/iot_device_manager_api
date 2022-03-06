@@ -19,6 +19,7 @@ router.post("/login", async (req, res, next)=>{
         res.status(401).json({error: "Email and password is required"});
         return;
     }
+    console.log(email);
     
     const user = await db.user.findUnique({
         where: {
@@ -73,24 +74,27 @@ router.post("/signup", async (req, res, next)=>{
         }
     });
 
+
     let errors =  [];
 
     if(email_search){
         errors.push({
             property: "email",
-            message: "Email already exists"
+            message: "Email already in use"
         });
     }
     if(username_search){
         errors.push({
             property: "username",
-            message: "Username already exists"
+            message: "Username already in use"
         });
     }
 
     if(errors.length > 0){
-        res.json({errors: errors});
+        res.status(409).json({errors: errors});
+        return;
     }
+
 
 
     const user = await db.user.create({data: {
@@ -100,7 +104,7 @@ router.post("/signup", async (req, res, next)=>{
     }});
     
 
-    res.json({
+    res.status(201).json({
         id: user.id,
         email: user.email,
         username: user.username
