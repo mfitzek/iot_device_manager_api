@@ -13,13 +13,13 @@ const router = Router();
 
 
 router.post("/login", async (req, res, next)=>{
+
     const {email, password} = req.body;
 
     if(!(email && password)){
         res.status(401).json({error: "Email and password is required"});
         return;
     }
-    console.log(email);
     
     const user = await db.user.findUnique({
         where: {
@@ -28,21 +28,28 @@ router.post("/login", async (req, res, next)=>{
     });
 
     if(!user){
+
         res.json({
             error: "Wrong email address or password"
         });
+
     }else{
         const equal = await compare(password, user.password);
         if(equal){
+            
+            const {token, expires_at} = await signToken({
+                user_id: user.id,
+                role: user.role
+            });
+
             res.json({
                 id: user.id,
                 email: user.email,
                 username: user.username,
-                token: await signToken({
-                    user_id: user.id,
-                    role: user.role
-                })
+                token: token,
+                expires_at: expires_at
             });
+
         }else{
             res.json({
                 error: "Wrong email address or password"

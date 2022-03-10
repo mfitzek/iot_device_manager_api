@@ -39,9 +39,13 @@ export async function signToken(user: UserToken){
         throw "Set up JWT_TOKEN";
     }
 
+
+    let expires_at: Date = new Date();
+    expires_at.setHours(expires_at.getHours() + 2);
+
     const token = await sign(user, secret, {expiresIn: "2hr"});
 
-    return token;
+    return {token, expires_at};
     
 }
 
