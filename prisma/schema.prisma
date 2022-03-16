@@ -11,14 +11,15 @@ datasource db {
 }
 
 model Device {
-  id                Int                 @id @default(autoincrement())
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  name              String
-  description       String?
-  telemetry         Telemetry[]
-  connection        DeviceConnection?
-  attributes        Attribute[]
+  id                 Int                 @id @default(autoincrement())
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  name               String
+  description        String?
+  location           String?
+  telemetry          Telemetry[]
+  connection         DeviceConnection?
+  attributes         Attribute[]
   mqtt_subscriptions MQTTSubscriptions[]
 }
 

@@ -56,9 +56,9 @@ const DeviceController = {
     
     
     async Insert(req: Request,res:Response, next:NextFunction) {
-        const {name, description} = req.body;
+        const {name, description, location} = req.body;
         const device: IDevice= {
-            name, description
+            name, description, location
         }
 
         const created = await devices.CreateDevice(device);
@@ -71,9 +71,9 @@ const DeviceController = {
     async Update(req: Request,res:Response, next:NextFunction) {
         const {device_id} = req.params;
 
-        const {name, description} = req.body;
+        const {name, description, location} = req.body;
         const device: IDevice= {
-            name, description
+            name, description, location
         }
 
         const updated = await devices.UpdateDevice(device_id, device);

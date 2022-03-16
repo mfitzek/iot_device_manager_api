@@ -1,4 +1,5 @@
 export interface IDevice {
-    name: string;
-    description: ?string;
+    name: string,
+    description: string?,
+    location: string?
 }
