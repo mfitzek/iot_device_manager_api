@@ -50,6 +50,9 @@ const DeviceController = {
     },
     
     async List(req: Request,res:Response, next:NextFunction) {
+        
+        //        const user_id = req.user!.user_id;
+
         const list = await devices.DeviceList({});
         res.json(list);
     },
@@ -93,16 +96,27 @@ const DeviceController = {
 
 
     async GetDeviceAttributes(req: Request,res:Response, next:NextFunction){
-
         res.send("Not implemented yet!");
-
     },
+    async AddAttribute(req: Request,res:Response, next:NextFunction){
+        // TODO: insert or update dev attributes
+        const {device_id} = req.params;
+        const {name, type} = req.body;
 
-    async SetDeviceAttributes(req: Request,res:Response, next:NextFunction){
+        const device = await devices.AddAttribute(Number(device_id), name, type);
+
+        res.json(device);
+    },
+    async UpdateAttribute(req: Request,res:Response, next:NextFunction){
         // TODO: insert or update dev attributes
         res.send("Not implemented yet!");
-
     },
+    async DeleteAttribute(req: Request,res:Response, next:NextFunction){
+        // TODO: insert or update dev attributes
+        res.send("Not implemented yet!");
+    },
+
+
 
     async GetDeviceConnection(req: Request,res:Response, next:NextFunction){
 

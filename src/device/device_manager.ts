@@ -3,7 +3,7 @@ import { Gateway, ListenMQTT } from "@/gateway/gateway";
 
 
 
-import { PrismaClient, Prisma, Device } from "@prisma/client";
+import { PrismaClient, Prisma, Device, Attribute } from "@prisma/client";
 import { IDevice } from "./device";
 
 
@@ -44,7 +44,7 @@ class DeviceManager{
             }
         });
 
-
+        /*
         for(let dev of devices){
             if(dev.connection?.type?.name == "mqtt"){
                 const mqtt_con = dev.connection.connectionString? JSON.parse(dev.connection.connectionString): null;
@@ -59,13 +59,28 @@ class DeviceManager{
 
             }
         }
+        */
 
     }
 
 
     // CRUD Methods 
     async DeviceList(query?: any) {
-        let data = await this.database.device.findMany(query);
+        let data = await this.database.device.findMany({
+            select: {
+                id: true,
+                name: true,
+                connection: {
+                    select:{
+                        type: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
         return data;
     }
 
@@ -83,7 +98,9 @@ class DeviceManager{
                         type: true,
                     }
                 },
-                mqtt_subscriptions: true
+                mqtt_subscriptions: true,
+                attributes: true
+                
             }
         });
         return data;
@@ -151,6 +168,23 @@ class DeviceManager{
             });
         }
 
+    }
+
+
+    async AddAttribute(device_id: number, name: string, type: string){
+        return await this.database.device.update({
+            where: {
+                id: device_id
+            },
+            data:{
+                attributes: {
+                    create: {
+                        name: name,
+                        type: type
+                    }
+                }
+            }
+        });
     }
 
 

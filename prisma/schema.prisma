@@ -17,18 +17,21 @@ model Device {
   name               String
   description        String?
   location           String?
+  owner              User                @relation(fields: [ownerID], references: [id])
   telemetry          Telemetry[]
   connection         DeviceConnection?
   attributes         Attribute[]
   mqtt_subscriptions MQTTSubscriptions[]
+  ownerID             Int
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  username String @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  username String   @unique
   password String
-  role     Int    @default(2)
+  role     Int      @default(2)
+  Device   Device[]
 }
 
 model Attribute {
@@ -44,9 +47,9 @@ model Attribute {
 model Telemetry {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
+  value       String
   deviceID    Int
   attributeID Int
-  value       String
   attribute   Attribute @relation(fields: [attributeID], references: [id])
   device      Device    @relation(fields: [deviceID], references: [id])
 }
