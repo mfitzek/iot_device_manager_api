@@ -51,6 +51,21 @@ export async function signToken(user: UserToken){
 
 
 
+export function requireAuth(min_level: number = 2){
+    return function(req: Request, res: Response, next: NextFunction){
+        if(req.user){
+            if(req.user.role < min_level){
+                res.status(403).send("You have no power here");
+            }else{
+                next();
+            }
+        }else{
+            res.status(401).send("Require auth");
+        }
+    }
+}
+
+
 
 
 
