@@ -4,7 +4,7 @@ import { Gateway, ListenMQTT } from "@/gateway/gateway";
 
 
 import { PrismaClient, Prisma, Device, Attribute } from "@prisma/client";
-import { IDevice } from "./device";
+import { IAttribute, IDevice } from "./device";
 
 
 class DeviceManager{
@@ -183,6 +183,25 @@ class DeviceManager{
                         type: type
                     }
                 }
+            }
+        });
+    }
+
+    async UpdateAttribute(attribute: IAttribute){
+        return await this.database.attribute.update({
+            where: {
+                id: attribute.id
+            },
+            data:{
+                ...attribute
+            }
+        });
+    }
+
+    async DeleteAttribute(attr_id: number){
+        return await this.database.attribute.delete({
+            where: {
+                id: attr_id
             }
         });
     }
