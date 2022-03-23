@@ -62,7 +62,6 @@ router.post("/login", async (req, res, next)=>{
 router.post("/signup", async (req, res, next)=>{
 
     const {email, username, password} = req.body;
-    console.log("body: ", email, username, password);
 
     if(!(email && username && password)){
         res.status(400).json({error: "Email,Username and password is required"});
@@ -82,24 +81,18 @@ router.post("/signup", async (req, res, next)=>{
     });
 
 
-    let errors =  [];
+    let errors: {email?: string, username?: string} =  {};
 
     if(email_search){
-        errors.push({
-            property: "email",
-            message: "Email already in use"
-        });
+        errors["email"] = "Email already in use";
     }
     if(username_search){
-        errors.push({
-            property: "username",
-            message: "Username already in use"
-        });
+        errors["username"] = "Username already in use";
+       
     }
 
-    if(errors.length > 0){
-        res.status(409).json({errors: errors});
-        return;
+    if(errors.email || errors.username){
+        return res.status(409).json(errors);
     }
 
 
