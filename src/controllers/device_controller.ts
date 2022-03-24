@@ -54,6 +54,7 @@ const DeviceController = {
             name,
             description,
             location,
+            ownerID: req.user!.user_id
         };
 
         const created = await devices.CreateDevice(device);
@@ -69,6 +70,7 @@ const DeviceController = {
             name,
             description,
             location,
+            ownerID: req.user!.user_id
         };
 
         const updated = await devices.UpdateDevice(device_id, device);

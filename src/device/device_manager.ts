@@ -117,7 +117,7 @@ class DeviceManager{
 
     async CreateDevice(device: IDevice){
         return await this.database.device.create({
-            data: device,
+            data: device
         });
     }
     
