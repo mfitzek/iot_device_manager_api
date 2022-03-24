@@ -1,12 +1,16 @@
-import {sign, verify} from "jsonwebtoken";
+import {sign, verify, decode, JwtPayload} from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import { randomBytes } from "crypto";
 
 
 import { UserToken } from "@/types/jwt_auth";
 
-const secret = process.env.JWT_SECRET?? "dev_test";
+const secret = process.env.JWT_SECRET || generateSecret() ;
+const expires_in = process.env.JWT_EXPIRES_IN || "2h";
 
-
+function generateSecret(){
+    return randomBytes(64);
+}
 
 
 
@@ -40,12 +44,9 @@ export async function signToken(user: UserToken){
     }
 
 
-    let expires_at: Date = new Date();
-    expires_at.setHours(expires_at.getHours() + 2);
-
-    const token = await sign(user, secret, {expiresIn: "2hr"});
-
-    return {token, expires_at};
+    const token = await sign(user, secret, {expiresIn: expires_in});
+    let expires_at = (decode(token) as JwtPayload).exp!;
+    return {token, expires_at: expires_at};
     
 }
 
