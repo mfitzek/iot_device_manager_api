@@ -3,6 +3,7 @@ import Database from "@db/database";
 import { IAttribute, IDevice } from "@/device/device";
 
 import device_manager from "@/device/device_manager";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const devices = device_manager;
 
@@ -150,9 +151,13 @@ const DeviceController = {
         try {
             const deleted = await device_manager.DeleteAttribute(Number(attr_id));
             res.json(deleted);
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json(error);
+        } catch (error: PrismaClientKnownRequestError | any ) {
+            if(error.code == "P2025"){
+                return res.status(404).send("Attribute not found");
+            }else{
+                console.log(error);
+                return res.status(500);
+            }
         }
     },
 
