@@ -42,9 +42,9 @@ const DeviceController = {
     },
 
     async List(req: Request, res: Response, next: NextFunction) {
-        //        const user_id = req.user!.user_id;
+        const user_id = req.user!.user_id;
 
-        const list = await devices.DeviceList({});
+        const list = await devices.DeviceList(user_id);
         res.json(list);
     },
 
@@ -82,6 +82,30 @@ const DeviceController = {
         const removed = await devices.DeleteDevice(device_id);
 
         res.json(removed);
+    },
+
+
+    async CheckDeviceOwner(req: Request, res: Response, next: NextFunction){
+
+        const owner = req.user?.user_id;
+        const device_id = Number(req.params["device_id"]);
+
+        if(!owner){
+            return  res.status(401).send("Please log in");
+        }
+
+        const device = await devices.FindDevice({
+            id: device_id,
+            ownerID: owner
+        });
+
+        if(device === null){
+            return res.status(403).send("Not your device");
+        }
+
+        next();
+        
+
     },
 
     async GetDeviceAttributes(req: Request, res: Response, next: NextFunction) {

@@ -65,8 +65,11 @@ class DeviceManager{
 
 
     // CRUD Methods 
-    async DeviceList(query?: any) {
+    async DeviceList(user_id: number) {
         let data = await this.database.device.findMany({
+            where:{
+                ownerID: user_id
+            },
             select: {
                 id: true,
                 name: true,
@@ -84,6 +87,11 @@ class DeviceManager{
         return data;
     }
 
+    async FindDevice(query: any){
+        return await this.database.device.findFirst({
+            where: query
+        });
+    }
 
     async GetDevice(id: any){
 

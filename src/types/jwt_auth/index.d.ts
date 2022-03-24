@@ -2,6 +2,6 @@
 
 
 export interface UserToken {
-    user_id: any,
-    role: Number
+    user_id: number,
+    role: number
 }
