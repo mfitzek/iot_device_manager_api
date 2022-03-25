@@ -11,18 +11,18 @@ datasource db {
 }
 
 model Device {
-  id                 Int                 @id @default(autoincrement())
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  name               String
-  description        String?
-  location           String?
-  owner              User                @relation(fields: [ownerID], references: [id])
-  telemetry          Telemetry[]
-  connection         DeviceConnection?
-  attributes         Attribute[]
-  mqtt_subscriptions MQTTSubscriptions[]
-  ownerID             Int
+  id             Int              @id @default(autoincrement())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  name           String
+  description    String?
+  location       String?
+  connection     String           @default("http")
+  ownerID        Int
+  owner          User             @relation(fields: [ownerID], references: [id])
+  telemetry      Telemetry[]
+  attributes     Attribute[]
+  ConnectionMQTT ConnectionMQTT[]
 }
 
 model User {
@@ -35,13 +35,13 @@ model User {
 }
 
 model Attribute {
-  id                 Int                 @id @default(autoincrement())
-  name               String
-  type               String
-  deviceID           Int
-  device             Device              @relation(fields: [deviceID], references: [id])
-  Telemetry          Telemetry[]
-  mqtt_subscriptions MQTTSubscriptions[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  type             String
+  deviceID         Int
+  device           Device             @relation(fields: [deviceID], references: [id])
+  Telemetry        Telemetry[]
+  AttributeMQTTMap AttributeMQTTMap[]
 }
 
 model Telemetry {
@@ -54,27 +54,23 @@ model Telemetry {
   device      Device    @relation(fields: [deviceID], references: [id])
 }
 
-model MQTTSubscriptions {
-  id                 Int       @id @default(autoincrement())
-  topic              String
-  attributeID        Int
-  deviceID           Int
-  deviceConnectionId Int?
-  attribute          Attribute @relation(fields: [attributeID], references: [id])
-  device             Device    @relation(fields: [deviceID], references: [id])
-}
-
-model DeviceConnection {
-  id               Int            @id @default(autoincrement())
-  deviceID         Int            @unique
-  typeID           Int
-  connectionString String?
-  type             ConnectionType @relation(fields: [typeID], references: [id])
-  device           Device         @relation(fields: [deviceID], references: [id])
-}
-
-model ConnectionType {
+model ConnectionMQTT {
   id               Int                @id @default(autoincrement())
-  name             String
-  DeviceConnection DeviceConnection[]
+  url              String
+  clientID         String
+  username         String?
+  password         String?
+  deviceID         Int
+  device           Device             @relation(fields: [deviceID], references: [id])
+  AttributeMQTTMap AttributeMQTTMap[]
+}
+
+model AttributeMQTTMap {
+  id         Int            @id @default(autoincrement())
+  path       String
+  attribute  Attribute      @relation(fields: [attributeID], references: [id])
+  connection ConnectionMQTT @relation(fields: [connectionID], references: [id])
+
+  attributeID  Int
+  connectionID Int
 }

@@ -21,9 +21,10 @@ class DeviceManager{
 
         this.gateway.on("telemetry", async (telemetry) =>{
 
-            const saved = await this.database.telemetry.create({
+            console.log("GW telemetry", telemetry);
+            /*const saved = await this.database.telemetry.create({
                 data: telemetry
-            });
+            });*/
 
         });
 
@@ -34,13 +35,11 @@ class DeviceManager{
 
         const devices = await this.database.device.findMany({
             include : { 
-                connection: 
-                { 
+                ConnectionMQTT: {
                     include: {
-                        type: true,
+                        AttributeMQTTMap: true
                     }
-                },
-                mqtt_subscriptions: true
+                }
             }
         });
 
@@ -73,15 +72,7 @@ class DeviceManager{
             select: {
                 id: true,
                 name: true,
-                connection: {
-                    select:{
-                        type: {
-                            select: {
-                                name: true
-                            }
-                        }
-                    }
-                }
+                connection: true
             }
         });
         return data;
@@ -101,14 +92,13 @@ class DeviceManager{
                 id: id
             },
             include: {
-                connection: {
+                attributes: true,
+                ConnectionMQTT: {
                     include: {
-                        type: true,
+                        AttributeMQTTMap: true
                     }
                 },
-                mqtt_subscriptions: true,
-                attributes: true
-                
+               
             }
         });
         return data;
