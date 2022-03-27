@@ -45,9 +45,9 @@ export async function signToken(user: UserToken){
 
 
     const token = await sign(user, secret, {expiresIn: expires_in});
-    let exp = (decode(token) as JwtPayload).exp!;
+    let exp = (decode(token) as JwtPayload).exp! * 1000;
 
-    let expires_at = new Date(Date.now() + exp);
+    let expires_at = new Date(exp);
 
     return {token, expires_at: expires_at};
     
