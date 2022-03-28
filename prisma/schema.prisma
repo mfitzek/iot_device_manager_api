@@ -22,7 +22,7 @@ model Device {
   owner          User             @relation(fields: [ownerID], references: [id])
   telemetry      Telemetry[]
   attributes     Attribute[]
-  ConnectionMQTT ConnectionMQTT[]
+  ConnectionMQTT ConnectionMQTT?
 }
 
 model User {

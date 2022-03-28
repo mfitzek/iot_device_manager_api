@@ -4,7 +4,7 @@ import { Gateway, ListenMQTT } from "@/gateway/gateway";
 
 
 import { PrismaClient, Prisma, Device, Attribute } from "@prisma/client";
-import { IAttribute, IDevice } from "./device";
+import { IAttribute, IConnection, IDevice } from "./device";
 
 
 class DeviceManager{
@@ -202,6 +202,72 @@ class DeviceManager{
                 id: attr_id
             }
         });
+    }
+
+    async UpdateConnection(device_id: number, connection: IConnection){
+        if(connection.type == "mqtt"){
+            const device = await this.database.device.update({
+                where: {
+                    id: device_id
+                },
+                data:{
+                    connection: "mqtt",
+                    
+                    ConnectionMQTT: {
+                        upsert: {
+                            update:{
+                                url: connection.mqtt.url,
+                                clientID: connection.mqtt.clientID,
+                                username: connection.mqtt.username,
+                                password: connection.mqtt.password,
+                            },
+                            create:{
+                                url: connection.mqtt.url,
+                                clientID: connection.mqtt.clientID,
+                                username: connection.mqtt.username,
+                                password: connection.mqtt.password,
+                            },
+                        }
+                    }
+                },
+                include: {
+                    ConnectionMQTT: true
+                }                
+            });
+
+            await this.database.attributeMQTTMap.deleteMany({
+                where: {
+                    connectionID: device.ConnectionMQTT!.id
+                }
+            });
+
+            await this.database.connectionMQTT.update({
+                where: {
+                    id: device.ConnectionMQTT!.id
+                },
+                data: {
+                    AttributeMQTTMap:{
+                        create: connection.mqtt.attribute_map
+                    }
+                }
+            });
+
+            
+            return this.GetDevice(device_id);
+
+        }
+
+        if(connection.type == "http"){
+            return this.database.device.update({
+                where:{
+                    id: device_id
+                },
+                data: {
+                    connection: "http"
+                }
+            });
+        }
+
     }
 
 

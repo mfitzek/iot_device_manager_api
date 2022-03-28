@@ -13,3 +13,20 @@ export interface IAttribute{
     name: string,
     type: string,
 }
+
+export interface IAttributeMap{
+    path: string
+    attributeID: number
+}
+
+export interface IConnection{
+    type: "http" | "mqtt",
+    mqtt: {
+        id?: number,
+        url: string,             
+        clientID: string,
+        username?: string,        
+        password?: string,
+        attribute_map: IAttributeMap[]
+    }
+}
