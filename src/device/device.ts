@@ -193,15 +193,65 @@ export class Device {
         });
     }
 
-    async add_attribute(){
+    async add_attribute(data: IAttribute){
+        const attr = await database.attribute.create({
+            data: {
+                name: data.name,
+                type: data.type,
+                deviceID: this.id!
+            }
+        });
 
+        const created: IAttribute = {
+            id: attr.id,
+            name: attr.name,
+            type: attr.type as AttributeType
+        }
+
+        this.attributes.push(created);
+        
+        return created;
     }
 
-    async delete_attribute(){
+    async update_attribute(data: IAttribute){
+        const attr = await database.attribute.update({
+            where: {
+                id: data.id!
+            },
+            data: {
+                name: data.name,
+                type: data.type,
+                deviceID: this.id!
+            }
+        });
 
+        const updated: IAttribute = {
+            id: attr.id,
+            name: attr.name,
+            type: attr.type as AttributeType
+        }
+
+        let idx = this.attributes.findIndex(a=> a.id == data.id);
+        this.attributes[idx] = updated;
+        
+        return updated;
     }
 
-    async update_connection(){
+    async delete_attribute(id: number){
+        const attr = await database.attribute.delete({
+            where: {
+                id: id
+            }
+        });
+
+
+        let idx = this.attributes.findIndex(a=> a.id == id);
+        this.attributes.splice(idx, 1);
+        
+        return `Attribute ${id} deleted`;
+    }
+
+    async update_connection(data: IConnection){
 
     }
 

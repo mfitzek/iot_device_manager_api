@@ -119,50 +119,45 @@ const DeviceController = {
         res.send("Not implemented yet!");
     },
     async AddAttribute(req: Request, res: Response, next: NextFunction) {
-        // TODO: insert or update dev attributes
+
         const { device_id } = req.params;
         const { name, type } = req.body;
 
-        const device = await devices.AddAttribute(Number(device_id), name, type);
+        const device = devices.GetDevice(Number(device_id));
 
-        res.json(device);
+        const attr = await device?.add_attribute({
+            name: name,
+            type: type
+        })
+
+        res.json(attr);
     },
     
     async UpdateAttribute(req: Request, res: Response, next: NextFunction) {
         const { device_id, attr_id } = req.params;
         const { name, type } = req.body;
 
-        try {
-            let attribute: IAttribute = {
-                id: Number(attr_id),
-                name,
-                type,
-            };
-            try {
-                const update = await device_manager.UpdateAttribute(attribute);
-                res.json(update);
-            } catch (error) {
-                console.log(error);
-                return res.status(500).json(error);
-            }
-        } catch (error) {
-            return res.status(400).json(error);
-        }
+
+        const device = devices.GetDevice(Number(device_id));
+
+        const attr = await device?.update_attribute({
+            id: Number(attr_id),
+            name: name,
+            type: type
+        })
+
+        res.json(attr);
+
+      
     },
     async DeleteAttribute(req: Request, res: Response, next: NextFunction) {
-        const { attr_id } = req.params;
+        const { device_id, attr_id } = req.params;
 
-        try {
-            const deleted = await device_manager.DeleteAttribute(Number(attr_id));
-            res.json(deleted);
-        } catch (error: PrismaClientKnownRequestError | any ) {
-            if(error.code == "P2025"){
-                return res.status(404).send("Attribute not found");
-            }else{
-                console.log(error);
-                return res.status(500);
-            }
-        }
+        const device = devices.GetDevice(Number(device_id));
+
+        const attr = await device?.delete_attribute(Number(attr_id));
+
+        res.json(attr);
     },
 
     async GetDeviceConnection(req: Request, res: Response, next: NextFunction) {

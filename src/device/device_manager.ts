@@ -148,7 +148,7 @@ class DeviceManager{
     }
 
 
-    async AddAttribute(device_id: number, name: string, type: string){
+ /*    async AddAttribute(device_id: number, name: string, type: string){
         return await this.database.device.update({
             where: {
                 id: device_id
@@ -181,7 +181,7 @@ class DeviceManager{
                 id: attr_id
             }
         });
-    }
+    } */
 
     async UpdateConnection(device_id: number, connection: IConnection){
 
