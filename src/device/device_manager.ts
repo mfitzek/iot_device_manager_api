@@ -186,7 +186,7 @@ class DeviceManager{
     async UpdateConnection(device_id: number, connection: IConnection){
 
         
-        if(connection.type == "mqtt"){
+/*         if(connection.type == "mqtt"){
             const device = await this.database.device.update({
                 where: {
                     id: device_id
@@ -247,7 +247,7 @@ class DeviceManager{
                     connection: "http"
                 }
             });
-        }
+        } */
 
     }
 

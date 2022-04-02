@@ -161,12 +161,14 @@ const DeviceController = {
 
     async SetDeviceConnection(req: Request, res: Response, next: NextFunction) {
 
-    
+        const {device_id} = req.params;
         const connection: IConnection = req.body["connection"];
-        console.log(connection);
+        
 
-        // TODO: set device connection
-        res.send("Not implemented yet!");
+        const device = devices.GetDevice(Number(device_id));
+        await device?.update_connection(connection);
+        
+        res.json(await device?.detail());
     },
 };
 

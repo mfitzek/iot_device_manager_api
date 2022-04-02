@@ -253,6 +253,94 @@ export class Device {
 
     async update_connection(data: IConnection){
 
+        
+        if(data.type == "mqtt"){
+            
+            let map_to_update = data.mqtt?.attributes_map.filter(row => row.id) || [];
+            let map_to_create = data.mqtt?.attributes_map.filter(row => !row.id) || [];
+            let map_to_delete = this.connection.mqtt?.attributes_map.filter(row => map_to_update?.find(upt=> upt.id == row.id) === undefined) || [];
+            
+            const device = await database.device.update({
+                where: {
+                    id: this.id
+                },
+                data: {
+                    connection: data.type,
+                    ConnectionMQTT: {
+                        upsert: {
+                            update:{
+                                url: data.mqtt!.url,
+                                clientID: data.mqtt!.clientID,
+                                username: data.mqtt!.username,
+                                password: data.mqtt!.password,
+                            },
+                            create:{
+                                url: data.mqtt!.url,
+                                clientID: data.mqtt!.clientID,
+                                username: data.mqtt!.username,
+                                password: data.mqtt!.password,
+                            },
+                        }
+                    }
+                },
+                include: {
+                    ConnectionMQTT: true
+                }
+            });
+
+            let transactions = [];
+            for(let rec of map_to_update){
+                let trans = database.attributeMQTTMap.update({
+                    where: {
+                        id: rec.id!
+                    },
+                    data: {
+                        ...rec
+                    }
+                });
+                transactions.push(trans);
+            }
+            for(let rec of map_to_create){
+                let trans = database.attributeMQTTMap.create({
+                    data: {
+                        path: rec.path,
+                        attributeID: rec.attributeID,
+                        connectionID: device.ConnectionMQTT!.id
+                    }
+                });
+                transactions.push(trans);
+            }
+            for(let rec of map_to_delete){
+                let trans = database.attributeMQTTMap.delete({
+                    where: {
+                        id: rec.id!
+                    }
+                });
+                transactions.push(trans);
+            }
+
+            await database.$transaction(transactions);
+
+            await this.fetch_data();
+            
+        }
+
+        if(data.type == "http"){
+
+            await database.device.update({
+                where:{
+                    id: this.id,
+                },data:{
+                    connection: "http"
+                }
+            });
+            await this.fetch_data();
+            
+        }
+
+
+
+
     }
 
 
