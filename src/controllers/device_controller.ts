@@ -115,9 +115,7 @@ const DeviceController = {
         }
     },
 
-    async GetDeviceAttributes(req: Request, res: Response, next: NextFunction) {
-        res.send("Not implemented yet!");
-    },
+
     async AddAttribute(req: Request, res: Response, next: NextFunction) {
 
         const { device_id } = req.params;
@@ -160,9 +158,6 @@ const DeviceController = {
         res.json(attr);
     },
 
-    async GetDeviceConnection(req: Request, res: Response, next: NextFunction) {
-        res.send("Not implemented yet!");
-    },
 
     async SetDeviceConnection(req: Request, res: Response, next: NextFunction) {
 
