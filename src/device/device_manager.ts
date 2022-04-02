@@ -3,8 +3,8 @@ import { Gateway, ListenMQTT } from "@/gateway/gateway";
 
 
 
-import { PrismaClient, Prisma, Device, Attribute } from "@prisma/client";
-import { IAttribute, IConnection, IDevice } from "./device";
+import { PrismaClient, Prisma, Device as DeviceDB, Attribute } from "@prisma/client";
+import { IDeviceData, Device, AttributeType, ConnectionType, IConnectionMQTT, IAttribute, IConnection, IDeviceShort } from "./device";
 
 
 class DeviceManager{
@@ -15,9 +15,16 @@ class DeviceManager{
 
     gateway: Gateway;
 
+
+    devices: Device[] = [];
+
+
     private constructor(){
         this.database = new PrismaClient();
         this.gateway = new Gateway();
+
+        this.InitManager();
+
 
         this.gateway.on("telemetry", async (telemetry) =>{
 
@@ -33,15 +40,22 @@ class DeviceManager{
 
     async InitManager(){
 
-        const devices = await this.database.device.findMany({
-            include : { 
-                ConnectionMQTT: {
-                    include: {
-                        AttributeMQTTMap: true
+        const device_list = await this.database.device.findMany({});
+        console.time("Device manager init")
+
+        for(let device of device_list){
+            let data: IDeviceShort = {
+                        id: device.id,
+                        name: device.name,
+                        description: device.description,
+                        location: device.location,
+                        ownerID: device.ownerID,
+                        connection: device.connection as ConnectionType
                     }
-                }
-            }
-        });
+            this.devices.push(new Device(data));
+        }
+
+        console.timeEnd("Device manager init");
 
         /*
         for(let dev of devices){
@@ -64,68 +78,33 @@ class DeviceManager{
 
 
     // CRUD Methods 
-    async DeviceList(user_id: number) {
-        let data = await this.database.device.findMany({
-            where:{
-                ownerID: user_id
-            },
-            select: {
-                id: true,
-                name: true,
-                connection: true
-            }
-        });
-        return data;
+    DeviceList(user_id: number) {
+        return this.devices.filter(device=> device.ownerID == user_id).map(dev => dev.short_detail());
     }
 
     async FindDevice(query: any){
-        return await this.database.device.findFirst({
-            where: query
-        });
+        throw "Not implemented";
     }
 
-    async GetDevice(id: any){
-
-        id = Number(id);
-        let data = await this.database.device.findUnique({
-            where: {
-                id: id
-            },
-            include: {
-                attributes: true,
-                ConnectionMQTT: {
-                    include: {
-                        AttributeMQTTMap: true
-                    }
-                },
-               
-            }
-        });
-        return data;
+    GetDevice(id: number): Device | undefined{
+        return this.devices.find(device=> device.id == id);
+    }
+    
+    async CreateDevice(data: IDeviceShort){
+        const device = new Device(data);
+        await device.insert();
+        this.devices.push(device);
+        return device;
     }
     
 
-    async CreateDevice(device: IDevice){
-        return await this.database.device.create({
-            data: device
-        });
-    }
-    
-    async UpdateDevice(id: any, device: IDevice) {
-        id = Number(id);
-        return await this.database.device.update({
-            where: {
-                id: id
-            },
-            data: device,
-         });
-    }
-
-    async DeleteDevice(id: any) {
-        id = Number(id);
-        return await this.database.device.delete({where: {
-            id: id
-        }});
+    async DeleteDevice(id: number) {
+        let idx = this.devices.findIndex(dev=> dev.id == id);
+        if(idx>=0){
+            this.devices[idx].delete();
+            this.devices.splice(idx, 1);
+        }
+        return `Device (${id}) deleted`;
     }
 
 
@@ -205,6 +184,8 @@ class DeviceManager{
     }
 
     async UpdateConnection(device_id: number, connection: IConnection){
+
+        
         if(connection.type == "mqtt"){
             const device = await this.database.device.update({
                 where: {
@@ -216,16 +197,16 @@ class DeviceManager{
                     ConnectionMQTT: {
                         upsert: {
                             update:{
-                                url: connection.mqtt.url,
-                                clientID: connection.mqtt.clientID,
-                                username: connection.mqtt.username,
-                                password: connection.mqtt.password,
+                                url: connection.mqtt!.url,
+                                clientID: connection.mqtt!.clientID,
+                                username: connection.mqtt!.username,
+                                password: connection.mqtt!.password,
                             },
                             create:{
-                                url: connection.mqtt.url,
-                                clientID: connection.mqtt.clientID,
-                                username: connection.mqtt.username,
-                                password: connection.mqtt.password,
+                                url: connection.mqtt!.url,
+                                clientID: connection.mqtt!.clientID,
+                                username: connection.mqtt!.username,
+                                password: connection.mqtt!.password,
                             },
                         }
                     }
@@ -247,7 +228,7 @@ class DeviceManager{
                 },
                 data: {
                     AttributeMQTTMap:{
-                        create: connection.mqtt.attribute_map
+                        create: connection.mqtt!.attributes_map
                     }
                 }
             });

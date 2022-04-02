@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Database from "@db/database";
-import { IAttribute, IDevice } from "@/device/device";
+import { IAttribute, IConnection, IDeviceData, IDeviceShort } from "@/device/device";
 
 import device_manager from "@/device/device_manager";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
@@ -8,14 +8,19 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 const devices = device_manager;
 
 const DeviceController = {
+
     async Get(req: Request, res: Response, next: NextFunction) {
         const { device_id } = req.params;
 
         const user = req.user!.user_id;
 
-        const device = await devices.GetDevice(device_id);
+        const device = await devices.GetDevice(Number(device_id))?.detail();
+        if(device){
+            res.json(device);
+        }else{
+            res.status(404).send("not found");
+        }
 
-        res.json(device);
     },
 
     async Telemetry(req: Request, res: Response, next: NextFunction) {
@@ -50,46 +55,49 @@ const DeviceController = {
     },
 
     async Insert(req: Request, res: Response, next: NextFunction) {
-        const { name, description, location } = req.body;
-        const device: IDevice = {
+        const { name, description, location, connection } = req.body;
+
+        const data: IDeviceShort = {
             name,
             description,
             location,
-            ownerID: req.user!.user_id
+            ownerID: req.user!.user_id,
+            connection: connection || "http"
         };
+        const created = await devices.CreateDevice(data);
+        res.json(await created.detail());
 
-        const created = await devices.CreateDevice(device);
-
-        res.json(created);
     },
 
     async Update(req: Request, res: Response, next: NextFunction) {
         const { device_id } = req.params;
 
-        const { name, description, location } = req.body;
-        const device: IDevice = {
+        const { name, description, location, connection } = req.body;
+
+        const data: IDeviceShort = {
             name,
             description,
             location,
-            ownerID: req.user!.user_id
+            ownerID: req.user!.user_id,
+            connection: connection
         };
 
-        const updated = await devices.UpdateDevice(device_id, device);
+        const device = devices.GetDevice(Number(device_id));
+        await device?.update(data);
 
-        res.json(updated);
+        res.json(await device?.detail());
     },
 
     async Delete(req: Request, res: Response, next: NextFunction) {
         const { device_id } = req.params;
 
-        const removed = await devices.DeleteDevice(device_id);
+        const removed = await devices.DeleteDevice(Number(device_id));
 
         res.json(removed);
     },
 
 
     async CheckDeviceOwner(req: Request, res: Response, next: NextFunction){
-
         const owner = req.user?.user_id;
         const device_id = Number(req.params["device_id"]);
 
@@ -97,18 +105,14 @@ const DeviceController = {
             return  res.status(401).send("Please log in");
         }
 
-        const device = await devices.FindDevice({
-            id: device_id,
-            ownerID: owner
-        });
-
-        if(device === null){
+        const device = await devices.GetDevice(device_id);
+        if(device && device.ownerID == owner){
+            return next();
+        }else if (device){
             return res.status(403).send("Not your device");
+        }else{
+            return res.status(404).send("Not found");
         }
-
-        next();
-        
-
     },
 
     async GetDeviceAttributes(req: Request, res: Response, next: NextFunction) {
@@ -123,6 +127,7 @@ const DeviceController = {
 
         res.json(device);
     },
+    
     async UpdateAttribute(req: Request, res: Response, next: NextFunction) {
         const { device_id, attr_id } = req.params;
         const { name, type } = req.body;
@@ -130,7 +135,6 @@ const DeviceController = {
         try {
             let attribute: IAttribute = {
                 id: Number(attr_id),
-                deviceID: Number(device_id),
                 name,
                 type,
             };
@@ -166,6 +170,11 @@ const DeviceController = {
     },
 
     async SetDeviceConnection(req: Request, res: Response, next: NextFunction) {
+
+    
+        const connection: IConnection = req.body["connection"];
+        console.log(connection);
+
         // TODO: set device connection
         res.send("Not implemented yet!");
     },

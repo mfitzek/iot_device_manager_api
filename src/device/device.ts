@@ -1,0 +1,209 @@
+import Database from "@/db/database";
+
+
+export type ConnectionType = "mqtt" | "http";
+export type AttributeType = "number" | "string" | "object";
+
+export interface IDeviceShort {
+
+    id?: number,
+    ownerID: number,
+    name: string,
+    location: string | null,
+    description: string | null,
+    connection: ConnectionType
+
+}
+
+export interface IDeviceData {
+
+    id?: number,
+    ownerID: number,
+    name: string,
+    location: string | null,
+    description: string | null,
+
+    connection: IConnection,
+    attributes: IAttribute[],
+
+}
+
+export interface IAttribute {
+
+    id?: number,
+    name: string,
+    type: AttributeType
+
+}
+
+export interface IAttributesMapMQTT{
+
+    id?: number,
+    path: string,
+    attributeID: number
+}
+
+export interface IConnectionMQTT {
+
+    id?: number,
+    url: string,
+    clientID: string,
+    username: string | null,
+    password: string | null,
+
+    attributes_map: IAttributesMapMQTT[]
+
+}
+
+export interface IConnection {
+
+    type: ConnectionType,
+    mqtt: IConnectionMQTT | null,
+
+}
+
+
+const database = Database.Instance.prisma;
+
+export class Device {
+
+    id?: number;
+    ownerID: number;
+
+    loaded: boolean = false;
+
+    private name: string;
+    private location: string | null;
+    private description: string | null;
+
+    private connection: IConnection;
+    private attributes: IAttribute[] = [];
+
+    constructor(data: IDeviceShort){
+        this.id = data.id;
+        this.name = data.name;
+        this.location = data.location;
+        this.description = data.description;
+
+        this.connection = {
+            type: data.connection,
+            mqtt: null
+        }
+
+        // this.attributes = data.attributes;
+
+        this.ownerID = data.ownerID;
+    }
+
+
+    async fetch_data(){
+        const data  = await database.device.findUnique({
+            where: {
+                id: this.id!
+            },
+            include : { 
+                attributes: true,
+                ConnectionMQTT: {
+                    include: {
+                        AttributeMQTTMap: true
+                    }
+                }
+            }
+        });
+
+        if(data){
+            this.attributes = data.attributes.map(attr=>{
+                return {
+                    id: attr.id,
+                    name: attr.name,
+                    type: attr.type as AttributeType
+                }
+            });
+
+            if(data.ConnectionMQTT){
+                this.connection.mqtt = {
+                    id: data.ConnectionMQTT.id,
+                    url: data.ConnectionMQTT.url,
+                    clientID: data.ConnectionMQTT.clientID,
+                    username: data.ConnectionMQTT.username,
+                    password: data.ConnectionMQTT.password,
+                    attributes_map: data.ConnectionMQTT.AttributeMQTTMap
+                }
+            }
+            this.loaded = true;
+        }
+
+    }
+
+    short_detail(){
+        let data: IDeviceShort = {
+            id: this.id,
+            ownerID: this.ownerID,
+            name: this.name,
+            description: this.description,
+            location: this.location,
+            connection: this.connection.type
+        }
+        return data;
+    }
+
+    async detail(){
+        if(this.loaded == false){
+            await this.fetch_data();
+        }
+
+        let data: IDeviceData = {
+            id: this.id,
+            ownerID: this.ownerID,
+            name: this.name,
+            description: this.description,
+            location: this.location,
+            attributes: this.attributes,
+            connection: this.connection
+        }
+        return data;
+    }
+
+    async insert(){
+        const inserted = await database.device.create({
+            data: this.short_detail(),
+        });
+        this.id = inserted.id;
+        return this.short_detail();
+    }
+
+    async update(data: IDeviceShort){
+        const dev = await database.device.update({
+            where: {
+                id: this.id
+            },
+            data: data
+        }); 
+
+        this.name = dev.name;
+        this.description = dev.description;
+        this.location = dev.location;
+    }
+
+    async delete(){
+        return await database.device.delete({
+            where: {
+                id: this.id
+            }
+        });
+    }
+
+    async add_attribute(){
+
+    }
+
+    async delete_attribute(){
+
+    }
+
+    async update_connection(){
+
+    }
+
+
+}

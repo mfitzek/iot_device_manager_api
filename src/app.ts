@@ -24,7 +24,7 @@ app.use(express.urlencoded({extended: true}))
 app.use(routes);
 
 
-device_manager.InitManager();
+// device_manager.InitManager();
 
 export default app;
 
