@@ -111,6 +111,9 @@ export class Device {
             }
         });
 
+        this.connection.type = data?.connection as ConnectionType ?? "http";
+
+
         if(data){
             this.attributes = data.attributes.map(attr=>{
                 return {
@@ -253,7 +256,6 @@ export class Device {
 
     async update_connection(data: IConnection){
 
-        
         if(data.type == "mqtt"){
             
             let map_to_update = data.mqtt?.attributes_map.filter(row => row.id) || [];
@@ -265,7 +267,7 @@ export class Device {
                     id: this.id
                 },
                 data: {
-                    connection: data.type,
+                    connection: "mqtt",
                     ConnectionMQTT: {
                         upsert: {
                             update:{
@@ -287,6 +289,7 @@ export class Device {
                     ConnectionMQTT: true
                 }
             });
+            
 
             let transactions = [];
             for(let rec of map_to_update){
@@ -334,6 +337,8 @@ export class Device {
                     connection: "http"
                 }
             });
+
+
             await this.fetch_data();
             
         }

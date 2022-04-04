@@ -167,8 +167,10 @@ const DeviceController = {
 
         const device = devices.GetDevice(Number(device_id));
         await device?.update_connection(connection);
+
+        const detail = await device?.detail();
         
-        res.json(await device?.detail());
+        res.json(detail);
     },
 };
 
