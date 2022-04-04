@@ -1,6 +1,5 @@
 import Database from "@/db/database";
 
-
 export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";
 
@@ -60,6 +59,14 @@ export interface IConnection {
     type: ConnectionType,
     mqtt: IConnectionMQTT | null,
 
+}
+
+
+export interface ITelemetry {
+    deviceID: number,
+    attributeID: number,
+    createdAt?: Date,
+    value: any
 }
 
 
@@ -253,6 +260,25 @@ export class Device {
         
         return `Attribute ${id} deleted`;
     }
+
+
+    async add_telemetry(telemetry: ITelemetry){
+
+        let value = JSON.stringify(telemetry.value);
+        
+        const data = await database.telemetry.create({
+            data: {
+                deviceID: this.id!,
+                value: value,
+                attributeID: telemetry.attributeID,
+                createdAt: telemetry.createdAt
+            }
+        });
+
+        return data;
+
+    }
+
 
     async update_connection(data: IConnection){
 
