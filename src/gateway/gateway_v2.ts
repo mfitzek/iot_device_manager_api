@@ -1,4 +1,5 @@
 import { Device } from "@device/device";
+import { MqttGateway } from "./mqtt_gw2";
 
 
 
@@ -27,24 +28,50 @@ export class Gateway implements IGateway {
 
     devices: Device[] = [];
 
-    constructor(){
+    mqtt_gw: MqttGateway;
 
+    private static _instance: Gateway;
+
+    private constructor(){
+        this.mqtt_gw = new MqttGateway();
+    }
+
+    static getInstance(): Gateway{
+        if(!Gateway._instance){
+            Gateway._instance = new Gateway();
+        }
+        return Gateway._instance;
     }
 
 
     async connect_device(dev: Device) {
 
-        this.devices.push(dev);
+        const detail = await dev.detail();
 
-        return true;
+        switch(detail.connection.type){
+            case "mqtt": 
+                if(await this.mqtt_gw.connect_device(dev)){
+                    this.devices.push(dev);
+                    return true;
+                }
+        }
+
+        return false;
+
     }
 
     async remove_device(dev: Device) {
         
-        this.devices.splice(this.devices.indexOf(dev), 1);
+        this.mqtt_gw.remove_device(dev);
 
+        let idx = this.devices.indexOf(dev);
 
-        return true;
+        if(idx>=0){
+            this.devices.splice(idx,1);
+            return true;
+        }
+        
+        return false;
     }
 }
 

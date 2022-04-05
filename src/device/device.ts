@@ -1,4 +1,5 @@
 import Database from "@/db/database";
+import { Gateway } from "@/gateway/gateway_v2";
 
 export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";
@@ -71,6 +72,7 @@ export interface ITelemetry {
 
 
 const database = Database.Instance.prisma;
+const gateway = Gateway.getInstance();
 
 export class Device {
 
@@ -262,96 +264,51 @@ export class Device {
     }
 
 
-    async add_telemetry(telemetry: ITelemetry){
+    async add_telemetry(attribute_id: number, value: string){
 
-        let value = JSON.stringify(telemetry.value);
-        
-        const data = await database.telemetry.create({
-            data: {
-                deviceID: this.id!,
-                value: value,
-                attributeID: telemetry.attributeID,
-                createdAt: telemetry.createdAt
+        if(!this.loaded){
+            await this.fetch_data(); 
+        }
+
+
+        let attr = this.attributes.find(a=>a.id == attribute_id);
+
+        if(attr){
+            let converted;
+            try {
+                switch(attr.type){
+                    case "number":
+                        converted = Number(value); break;
+                    case "object":
+                        converted = JSON.parse(value); break;
+                    case "string":
+                        converted = value;
+                }
+            } catch (error) {
+                console.log("Telemetry value conversion error");
+                return null;
             }
-        });
 
-        return data;
+            const data = await database.telemetry.create({
+                data: {
+                    deviceID: this.id!,
+                    value: JSON.stringify(converted),
+                    attributeID: attribute_id,
+                }
+            });
 
+            return data;
+        }
+        
+        return null;
+        
     }
 
 
     async update_connection(data: IConnection){
 
         if(data.type == "mqtt"){
-            
-            let map_to_update = data.mqtt?.attributes_map.filter(row => row.id) || [];
-            let map_to_create = data.mqtt?.attributes_map.filter(row => !row.id) || [];
-            let map_to_delete = this.connection.mqtt?.attributes_map.filter(row => map_to_update?.find(upt=> upt.id == row.id) === undefined) || [];
-            
-            const device = await database.device.update({
-                where: {
-                    id: this.id
-                },
-                data: {
-                    connection: "mqtt",
-                    ConnectionMQTT: {
-                        upsert: {
-                            update:{
-                                url: data.mqtt!.url,
-                                clientID: data.mqtt!.clientID,
-                                username: data.mqtt!.username,
-                                password: data.mqtt!.password,
-                            },
-                            create:{
-                                url: data.mqtt!.url,
-                                clientID: data.mqtt!.clientID,
-                                username: data.mqtt!.username,
-                                password: data.mqtt!.password,
-                            },
-                        }
-                    }
-                },
-                include: {
-                    ConnectionMQTT: true
-                }
-            });
-            
-
-            let transactions = [];
-            for(let rec of map_to_update){
-                let trans = database.attributeMQTTMap.update({
-                    where: {
-                        id: rec.id!
-                    },
-                    data: {
-                        ...rec
-                    }
-                });
-                transactions.push(trans);
-            }
-            for(let rec of map_to_create){
-                let trans = database.attributeMQTTMap.create({
-                    data: {
-                        path: rec.path,
-                        attributeID: rec.attributeID,
-                        connectionID: device.ConnectionMQTT!.id
-                    }
-                });
-                transactions.push(trans);
-            }
-            for(let rec of map_to_delete){
-                let trans = database.attributeMQTTMap.delete({
-                    where: {
-                        id: rec.id!
-                    }
-                });
-                transactions.push(trans);
-            }
-
-            await database.$transaction(transactions);
-
-            await this.fetch_data();
-            
+           await this.update_mqtt_connection(data);
         }
 
         if(data.type == "http"){
@@ -369,9 +326,82 @@ export class Device {
             
         }
 
+        await gateway.remove_device(this);
+        await gateway.connect_device(this);
+
+    }
 
 
 
+    async update_mqtt_connection(data: IConnection){
+
+        let map_to_update = data.mqtt?.attributes_map.filter(row => row.id) || [];
+        let map_to_create = data.mqtt?.attributes_map.filter(row => !row.id) || [];
+        let map_to_delete = this.connection.mqtt?.attributes_map.filter(row => map_to_update?.find(upt=> upt.id == row.id) === undefined) || [];
+        
+        const device = await database.device.update({
+            where: {
+                id: this.id
+            },
+            data: {
+                connection: "mqtt",
+                ConnectionMQTT: {
+                    upsert: {
+                        update:{
+                            url: data.mqtt!.url,
+                            clientID: data.mqtt!.clientID,
+                            username: data.mqtt!.username,
+                            password: data.mqtt!.password,
+                        },
+                        create:{
+                            url: data.mqtt!.url,
+                            clientID: data.mqtt!.clientID,
+                            username: data.mqtt!.username,
+                            password: data.mqtt!.password,
+                        },
+                    }
+                }
+            },
+            include: {
+                ConnectionMQTT: true
+            }
+        });
+        
+
+        let transactions = [];
+        for(let rec of map_to_update){
+            let trans = database.attributeMQTTMap.update({
+                where: {
+                    id: rec.id!
+                },
+                data: {
+                    ...rec
+                }
+            });
+            transactions.push(trans);
+        }
+        for(let rec of map_to_create){
+            let trans = database.attributeMQTTMap.create({
+                data: {
+                    path: rec.path,
+                    attributeID: rec.attributeID,
+                    connectionID: device.ConnectionMQTT!.id
+                }
+            });
+            transactions.push(trans);
+        }
+        for(let rec of map_to_delete){
+            let trans = database.attributeMQTTMap.delete({
+                where: {
+                    id: rec.id!
+                }
+            });
+            transactions.push(trans);
+        }
+
+        await database.$transaction(transactions);
+
+        await this.fetch_data();
     }
 
 
