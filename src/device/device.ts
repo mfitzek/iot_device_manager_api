@@ -4,6 +4,15 @@ import { Gateway } from "@/gateway/gateway"
 export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";
 
+
+
+export interface IDeviceAttributes {
+    id: number,
+    name: string,
+    attributes: IAttribute[]
+}
+
+
 export interface IDeviceShort {
 
     id?: number,
@@ -12,8 +21,9 @@ export interface IDeviceShort {
     location: string | null,
     description: string | null,
     connection: ConnectionType
-
 }
+
+
 
 export interface IDeviceData {
 

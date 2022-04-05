@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Database from "@db/database";
-import { IAttribute, IConnection, IDeviceData, IDeviceShort } from "@/device/device";
+import { IAttribute, IConnection, IDeviceAttributes, IDeviceData, IDeviceShort } from "@/device/device";
 
 import device_manager from "@/device/device_manager";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
@@ -24,26 +24,26 @@ const DeviceController = {
     },
 
     async Telemetry(req: Request, res: Response, next: NextFunction) {
-        const { device_id } = req.params;
+        //const { device_id } = req.params;
         const { attr, date_start, date_end } = req.query;
 
-        let attributes: string[] = [];
+        let attributes: number[] = [];
 
         if (Array.isArray(attr)) {
             for (let a of attr) {
-                attributes.push(a.toString());
+                attributes.push(Number(a));
             }
         } else if (attr) {
-            attributes.push(attr.toString());
+            attributes.push(Number(attr));
         }
 
         let end = date_end ? new Date(String(date_end)) : new Date();
         let start = date_start ? new Date(String(date_start)) : new Date(0);
 
-        console.log({ device_id, attributes, start, end });
 
-        const telemetry = await devices.DeviceTelemetry(device_id, attributes, start, end);
+        const telemetry = await devices.DeviceTelemetry(attributes, start, end);
 
+        // res.send("ok");
         res.json(telemetry);
     },
 
@@ -53,6 +53,16 @@ const DeviceController = {
         const list = await devices.DeviceList(user_id);
         res.json(list);
     },
+
+    
+    async ListDeviceAttributes(req: Request, res: Response, next: NextFunction){
+        const user_id = req.user!.user_id;
+
+        const list = await devices.AllDeviceAttributes(user_id);
+        res.json(list);
+    },
+
+
 
     async Insert(req: Request, res: Response, next: NextFunction) {
         const { name, description, location, connection } = req.body;

@@ -3,7 +3,8 @@ import Database from "@/db/database";
 import { Gateway } from "@/gateway/gateway"
 
 import { PrismaClient } from "@prisma/client";
-import {  Device, ConnectionType, IConnection, IDeviceShort } from "./device";
+import {  Device, ConnectionType, IConnection, IDeviceShort, IDeviceAttributes, AttributeType } from "./device";
+
 
 
 class DeviceManager{
@@ -66,6 +67,33 @@ class DeviceManager{
     GetDevice(id: number): Device | undefined{
         return this.devices.find(device=> device.id == id);
     }
+
+
+    async AllDeviceAttributes(user_id: number): Promise<IDeviceAttributes[]> {
+        let list = await this.database.device.findMany({
+            where: {
+                ownerID: user_id
+            },
+            include: {
+                attributes: true
+            }
+        });
+
+        return list.map(dev=> {
+            return {
+                id: dev.id,
+                name: dev.name,
+                attributes: dev.attributes.map(attr=>{
+                    return {
+                        id: attr.id,
+                        name: attr.name,
+                        type: attr.type as AttributeType
+                    }
+                })
+            }
+        });
+    }
+
     
     async CreateDevice(data: IDeviceShort){
         const device = new Device(data);
@@ -86,39 +114,21 @@ class DeviceManager{
 
 
 
-    async DeviceTelemetry(id: any, attributes: string[], start: Date, end: Date){
-        id = Number(id);
+    async DeviceTelemetry(attributes: number[], start: Date, end: Date){
         
         if(attributes.length > 0){
             return await this.database.telemetry.findMany({
                 where: {
-                    deviceID: id,
                     createdAt: {
                         gte: start,
                         lte: end
                     },
                     attribute: {
-                        name:{
+                        id:{
                             in: attributes
                         }
                     }
                 },
-                include: {
-                    attribute: true
-                }
-            });
-        }else{
-            return await this.database.telemetry.findMany({
-                where: {
-                    deviceID: id,
-                    createdAt: {
-                        gte: start,
-                        lte: end
-                    }
-                },
-                include: {
-                    attribute: true
-                }
             });
         }
 
