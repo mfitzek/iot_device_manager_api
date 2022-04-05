@@ -2,7 +2,7 @@ import mqtt from "mqtt";
 import match from "mqtt-match";
 
 import { Device } from "@/device/device";
-import {IGateway} from "./gateway_v2"
+import {IGateway} from "./gateway"
 import { randomBytes } from "crypto";
 
 

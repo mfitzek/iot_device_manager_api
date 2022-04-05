@@ -1,5 +1,5 @@
 import Database from "@/db/database";
-import { Gateway } from "@/gateway/gateway_v2";
+import { Gateway } from "@/gateway/gateway"
 
 export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";

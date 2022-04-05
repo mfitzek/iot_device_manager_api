@@ -1,6 +1,6 @@
 import Database from "@/db/database";
 
-import { Gateway } from "@/gateway/gateway_v2";
+import { Gateway } from "@/gateway/gateway"
 
 import { PrismaClient } from "@prisma/client";
 import {  Device, ConnectionType, IConnection, IDeviceShort } from "./device";

@@ -1,5 +1,5 @@
 import { Device } from "@device/device";
-import { MqttGateway } from "./mqtt_gw2";
+import { MqttGateway } from "./mqtt_gw";
 
 
 
