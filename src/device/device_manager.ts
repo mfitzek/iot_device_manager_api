@@ -1,9 +1,9 @@
-import Database from "@db/database"
+import Database from "@/db/database";
 
 import { Gateway } from "@/gateway/gateway_v2";
 
-import { PrismaClient, Prisma, Device as DeviceDB, Attribute } from "@prisma/client";
-import { IDeviceData, Device, AttributeType, ConnectionType, IConnectionMQTT, IAttribute, IConnection, IDeviceShort } from "./device";
+import { PrismaClient } from "@prisma/client";
+import {  Device, ConnectionType, IConnection, IDeviceShort } from "./device";
 
 
 class DeviceManager{
@@ -19,7 +19,7 @@ class DeviceManager{
 
 
     private constructor(){
-        this.database = new PrismaClient();
+        this.database = Database.Instance.prisma;
         this.gateway = Gateway.getInstance();
 
         this.InitManager();
