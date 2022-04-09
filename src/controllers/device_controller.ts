@@ -65,12 +65,13 @@ const DeviceController = {
 
 
     async Insert(req: Request, res: Response, next: NextFunction) {
-        const { name, description, location, connection } = req.body;
+        const { name, description, location, connection, type } = req.body;
 
         const data: IDeviceShort = {
             name,
             description,
             location,
+            type: Number(type),
             ownerID: req.user!.user_id,
             connection: connection || "http"
         };
@@ -82,12 +83,13 @@ const DeviceController = {
     async Update(req: Request, res: Response, next: NextFunction) {
         const { device_id } = req.params;
 
-        const { name, description, location, connection } = req.body;
+        const { name, description, location, connection, type } = req.body;
 
         const data: IDeviceShort = {
             name,
             description,
             location,
+            type: Number(type),
             ownerID: req.user!.user_id,
             connection: connection
         };

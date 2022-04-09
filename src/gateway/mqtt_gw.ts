@@ -53,12 +53,10 @@ export class MqttGateway implements IMqttGateway{
             });
 
             for(let sub  of connection.attributes_map){
-                console.log("MQTT subscribe", sub.path);
                 client.subscribe(sub.path);
             }
 
             client.on("message", (topic, msg)=>{
-                console.log("MQTT message", topic, msg.toString());
                 const topics = connection.attributes_map.filter(attr => match(attr.path, topic));
                 for(let topic of topics){
                     dev.add_telemetry(topic.attributeID, msg.toString());
@@ -82,8 +80,6 @@ export class MqttGateway implements IMqttGateway{
     async remove_device(dev: Device): Promise<boolean> {
 
         let idx = this.clients.findIndex(cl=>cl.device == dev);
-
-        console.log("MQTT GW remove device", dev.id, idx);
 
         if(idx>=0){
             this.clients[idx].client.end();

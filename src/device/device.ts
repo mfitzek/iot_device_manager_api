@@ -5,6 +5,14 @@ export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";
 
 
+export const DeviceTypeList = [
+    "General device"
+]
+
+export enum DeviceType{
+    General = 0
+}
+
 
 export interface IDeviceAttributes {
     id: number,
@@ -20,6 +28,7 @@ export interface IDeviceShort {
     name: string,
     location: string | null,
     description: string | null,
+    type: DeviceType,
     connection: ConnectionType
 }
 
@@ -32,6 +41,7 @@ export interface IDeviceData {
     name: string,
     location: string | null,
     description: string | null,
+    type: DeviceType,
 
     connection: IConnection,
     attributes: IAttribute[],
@@ -97,12 +107,14 @@ export class Device {
 
     private connection: IConnection;
     private attributes: IAttribute[] = [];
+    private type: DeviceType;
 
     constructor(data: IDeviceShort){
         this.id = data.id;
         this.name = data.name;
         this.location = data.location;
         this.description = data.description;
+        this.type = data.type;
 
         this.connection = {
             type: data.connection,
@@ -163,6 +175,7 @@ export class Device {
             ownerID: this.ownerID,
             name: this.name,
             description: this.description,
+            type: this.type,
             location: this.location,
             connection: this.connection.type
         }
@@ -180,6 +193,7 @@ export class Device {
             name: this.name,
             description: this.description,
             location: this.location,
+            type: this.type,
             attributes: this.attributes,
             connection: this.connection
         }

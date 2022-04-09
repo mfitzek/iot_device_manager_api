@@ -4,6 +4,7 @@ import { Gateway } from "@/gateway/gateway"
 
 import { PrismaClient } from "@prisma/client";
 import {  Device, ConnectionType, IConnection, IDeviceShort, IDeviceAttributes, AttributeType } from "./device";
+import { DeviceFactory } from "./device_factory";
 
 
 
@@ -18,9 +19,12 @@ class DeviceManager{
 
     devices: Device[] = [];
 
+    device_factory: DeviceFactory;
+
 
     private constructor(){
         this.database = Database.Instance.prisma;
+        this.device_factory = new DeviceFactory();
         this.gateway = Gateway.getInstance();
 
         this.InitManager();
@@ -39,10 +43,11 @@ class DeviceManager{
                         name: device.name,
                         description: device.description,
                         location: device.location,
+                        type: device.type,
                         ownerID: device.ownerID,
                         connection: device.connection as ConnectionType
                     }
-            this.devices.push(new Device(data));
+            this.devices.push(this.device_factory.create(data));
         }
 
         console.timeEnd("Device manager init");

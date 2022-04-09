@@ -18,12 +18,14 @@ model Device {
   description    String?
   location       String?
   connection     String           @default("http")
+  type  Int @default(0)
   ownerID        Int
   owner          User             @relation(fields: [ownerID], references: [id])
   telemetry      Telemetry[]
   attributes     Attribute[]
   ConnectionMQTT ConnectionMQTT?
 }
+
 
 model User {
   id       Int      @id @default(autoincrement())
