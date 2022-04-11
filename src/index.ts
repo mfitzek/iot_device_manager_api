@@ -3,7 +3,7 @@ import app from "./app"
 import process from "process";
 
 
-import { Gateway, ListenMQTT } from "./gateway/gateway";
+import { Gateway } from "./gateway/gateway";
 
 
 const port = process.env.SERVER_PORT || 3000;
