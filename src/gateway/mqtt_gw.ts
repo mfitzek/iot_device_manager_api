@@ -6,11 +6,7 @@ import {IGateway} from "./gateway"
 import { randomBytes } from "crypto";
 
 
-export interface IMqttGateway extends IGateway{
-
-    //mqtt connections[]
-
-}
+export type IMqttGateway = IGateway
 
 
 interface ClientDevice {
@@ -45,20 +41,20 @@ export class MqttGateway implements IMqttGateway{
                 client_id = `${connection.clientID}_${randomBytes(4).toString("hex")}`;
             }
 
-            let client = await mqtt.connect(connection.url, {
+            const client = await mqtt.connect(connection.url, {
                 clientId: client_id,
                 username: connection.username || undefined,
                 password: connection.password || undefined,
                 reconnectPeriod: 60000
             });
 
-            for(let sub  of connection.attributes_map){
+            for(const sub  of connection.attributes_map){
                 client.subscribe(sub.path);
             }
 
             client.on("message", (topic, msg)=>{
                 const topics = connection.attributes_map.filter(attr => match(attr.path, topic));
-                for(let topic of topics){
+                for(const topic of topics){
                     dev.add_telemetry(topic.attributeID, msg.toString());
                 }
             });
@@ -79,7 +75,7 @@ export class MqttGateway implements IMqttGateway{
 
     async remove_device(dev: Device): Promise<boolean> {
 
-        let idx = this.clients.findIndex(cl=>cl.device == dev);
+        const idx = this.clients.findIndex(cl=>cl.device == dev);
 
         if(idx>=0){
             this.clients[idx].client.end();

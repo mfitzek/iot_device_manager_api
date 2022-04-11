@@ -81,7 +81,7 @@ router.post("/signup", async (req, res, next)=>{
     });
 
 
-    let errors: {email?: string, username?: string} =  {};
+    const errors: {email?: string, username?: string} =  {};
 
     if(email_search){
         errors["email"] = "Email already in use";

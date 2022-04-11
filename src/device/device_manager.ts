@@ -37,8 +37,8 @@ class DeviceManager{
         const device_list = await this.database.device.findMany({});
         console.time("Device manager init")
 
-        for(let device of device_list){
-            let data: IDeviceShort = {
+        for(const device of device_list){
+            const data: IDeviceShort = {
                         id: device.id,
                         name: device.name,
                         description: device.description,
@@ -75,7 +75,7 @@ class DeviceManager{
 
 
     async AllDeviceAttributes(user_id: number): Promise<IDeviceAttributes[]> {
-        let list = await this.database.device.findMany({
+        const list = await this.database.device.findMany({
             where: {
                 ownerID: user_id
             },
@@ -109,7 +109,7 @@ class DeviceManager{
     
 
     async DeleteDevice(id: number) {
-        let idx = this.devices.findIndex(dev=> dev.id == id);
+        const idx = this.devices.findIndex(dev=> dev.id == id);
         if(idx>=0){
             this.devices[idx].delete();
             this.devices.splice(idx, 1);
@@ -144,16 +144,8 @@ class DeviceManager{
 
     }
 
-
-
-    async UpdateConnection(device_id: number, connection: IConnection){
-
-        
-    }
-
-
     async ConnectDevices(){
-        for(let dev of this.devices){
+        for(const dev of this.devices){
             this.gateway.connect_device(dev);
         }
     }

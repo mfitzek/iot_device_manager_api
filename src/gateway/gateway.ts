@@ -64,7 +64,7 @@ export class Gateway implements IGateway {
         
         this.mqtt_gw.remove_device(dev);
 
-        let idx = this.devices.indexOf(dev);
+        const idx = this.devices.indexOf(dev);
 
         if(idx>=0){
             this.devices.splice(idx,1);

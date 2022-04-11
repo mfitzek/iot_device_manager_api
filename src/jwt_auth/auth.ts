@@ -45,9 +45,9 @@ export async function signToken(user: UserToken){
 
 
     const token = await sign(user, secret, {expiresIn: expires_in});
-    let exp = (decode(token) as JwtPayload).exp! * 1000;
+    const exp = (decode(token) as JwtPayload).exp! * 1000;
 
-    let expires_at = new Date(exp);
+    const expires_at = new Date(exp);
 
     return {token, expires_at: expires_at};
     
@@ -55,7 +55,7 @@ export async function signToken(user: UserToken){
 
 
 
-export function requireAuth(min_level: number = 2){
+export function requireAuth(min_level = 2){
     return function(req: Request, res: Response, next: NextFunction){
         if(req.user){
             if(req.user.role < min_level){

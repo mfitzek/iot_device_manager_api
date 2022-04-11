@@ -99,7 +99,7 @@ export class Device {
     id?: number;
     ownerID: number;
 
-    loaded: boolean = false;
+    loaded = false;
 
     private name: string;
     private location: string | null;
@@ -170,7 +170,7 @@ export class Device {
     }
 
     short_detail(){
-        let data: IDeviceShort = {
+        const data: IDeviceShort = {
             id: this.id,
             ownerID: this.ownerID,
             name: this.name,
@@ -187,7 +187,7 @@ export class Device {
             await this.fetch_data();
         }
 
-        let data: IDeviceData = {
+        const data: IDeviceData = {
             id: this.id,
             ownerID: this.ownerID,
             name: this.name,
@@ -267,7 +267,7 @@ export class Device {
             type: attr.type as AttributeType
         }
 
-        let idx = this.attributes.findIndex(a=> a.id == data.id);
+        const idx = this.attributes.findIndex(a=> a.id == data.id);
         this.attributes[idx] = updated;
         
         return updated;
@@ -281,7 +281,7 @@ export class Device {
         });
 
 
-        let idx = this.attributes.findIndex(a=> a.id == id);
+        const idx = this.attributes.findIndex(a=> a.id == id);
         this.attributes.splice(idx, 1);
         
         return `Attribute ${id} deleted`;
@@ -295,7 +295,7 @@ export class Device {
         }
 
 
-        let attr = this.attributes.find(a=>a.id == attribute_id);
+        const attr = this.attributes.find(a=>a.id == attribute_id);
 
         if(attr){
             let converted;
@@ -359,9 +359,9 @@ export class Device {
 
     async update_mqtt_connection(data: IConnection){
 
-        let map_to_update = data.mqtt?.attributes_map.filter(row => row.id) || [];
-        let map_to_create = data.mqtt?.attributes_map.filter(row => !row.id) || [];
-        let map_to_delete = this.connection.mqtt?.attributes_map.filter(row => map_to_update?.find(upt=> upt.id == row.id) === undefined) || [];
+        const map_to_update = data.mqtt?.attributes_map.filter(row => row.id) || [];
+        const map_to_create = data.mqtt?.attributes_map.filter(row => !row.id) || [];
+        const map_to_delete = this.connection.mqtt?.attributes_map.filter(row => map_to_update?.find(upt=> upt.id == row.id) === undefined) || [];
         
         const device = await database.device.update({
             where: {
@@ -392,9 +392,9 @@ export class Device {
         });
         
 
-        let transactions = [];
-        for(let rec of map_to_update){
-            let trans = database.attributeMQTTMap.update({
+        const transactions = [];
+        for(const rec of map_to_update){
+            const trans = database.attributeMQTTMap.update({
                 where: {
                     id: rec.id!
                 },
@@ -404,8 +404,8 @@ export class Device {
             });
             transactions.push(trans);
         }
-        for(let rec of map_to_create){
-            let trans = database.attributeMQTTMap.create({
+        for(const rec of map_to_create){
+            const trans = database.attributeMQTTMap.create({
                 data: {
                     path: rec.path,
                     attributeID: rec.attributeID,
@@ -414,8 +414,8 @@ export class Device {
             });
             transactions.push(trans);
         }
-        for(let rec of map_to_delete){
-            let trans = database.attributeMQTTMap.delete({
+        for(const rec of map_to_delete){
+            const trans = database.attributeMQTTMap.delete({
                 where: {
                     id: rec.id!
                 }

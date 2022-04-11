@@ -27,18 +27,18 @@ const DeviceController = {
         //const { device_id } = req.params;
         const { attr, date_start, date_end } = req.query;
 
-        let attributes: number[] = [];
+        const attributes: number[] = [];
 
         if (Array.isArray(attr)) {
-            for (let a of attr) {
+            for (const a of attr) {
                 attributes.push(Number(a));
             }
         } else if (attr) {
             attributes.push(Number(attr));
         }
 
-        let end = date_end ? new Date(String(date_end)) : new Date();
-        let start = date_start ? new Date(String(date_start)) : new Date(0);
+        const end = date_end ? new Date(String(date_end)) : new Date();
+        const start = date_start ? new Date(String(date_start)) : new Date(0);
 
 
         const telemetry = await devices.DeviceTelemetry(attributes, start, end);
