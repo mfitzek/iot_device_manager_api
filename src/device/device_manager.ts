@@ -33,9 +33,9 @@ class DeviceManager{
 
 
     async InitManager(){
-
         const device_list = await this.database.device.findMany({});
         console.time("Device manager init")
+        await this.gateway.disconnet_all();
 
         for(const device of device_list){
             const data: IDeviceShort = {

@@ -1,8 +1,11 @@
 import { Request, Response } from "express"
-import { backup_database } from "@/db/database";
+import { backup_database, restore_database } from "@/db/database";
 import AdmZip from "adm-zip";
 
 import moment from "moment";
+import device_manager from "@/device/device_manager";
+
+
 
 
 export default {
@@ -38,6 +41,18 @@ export default {
             console.log(error);
             res.status(500).send("failed");        
         }
+    },
+
+
+    async restore(req: Request, res: Response){
+
+        const zip = new AdmZip(req.file?.buffer);
+        zip.extractEntryTo("db.bak", "backup", false, true);
+        await restore_database();
+        await device_manager.InitManager();
+
+
+        res.send("ok");
     }
 
 }

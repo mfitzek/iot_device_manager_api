@@ -73,6 +73,13 @@ export class Gateway implements IGateway {
         
         return false;
     }
+
+    async disconnet_all(): Promise<void> {
+        const device_list = [...this.devices];
+        for(const d of device_list){
+            this.remove_device(d);
+        }
+    }
 }
 
 

@@ -20,7 +20,7 @@ model Device {
   connection     String           @default("http")
   type  Int @default(0)
   ownerID        Int
-  owner          User             @relation(fields: [ownerID], references: [id])
+  owner          User             @relation(fields: [ownerID], references: [id], onDelete: Cascade)
   telemetry      Telemetry[]
   attributes     Attribute[]
   ConnectionMQTT ConnectionMQTT?
@@ -41,7 +41,7 @@ model Attribute {
   name             String
   type             String
   deviceID         Int
-  device           Device             @relation(fields: [deviceID], references: [id])
+  device           Device             @relation(fields: [deviceID], references: [id], onDelete: Cascade)
   Telemetry        Telemetry[]
   AttributeMQTTMap AttributeMQTTMap[]
 }
@@ -52,8 +52,8 @@ model Telemetry {
   value       String
   deviceID    Int
   attributeID Int
-  attribute   Attribute @relation(fields: [attributeID], references: [id])
-  device      Device    @relation(fields: [deviceID], references: [id])
+  attribute   Attribute @relation(fields: [attributeID], references: [id], onDelete: Cascade)
+  device      Device    @relation(fields: [deviceID], references: [id], onDelete: Cascade)
 }
 
 model ConnectionMQTT {
@@ -63,15 +63,15 @@ model ConnectionMQTT {
   username         String?
   password         String?
   deviceID         Int
-  device           Device             @relation(fields: [deviceID], references: [id])
+  device           Device             @relation(fields: [deviceID], references: [id], onDelete: Cascade)
   AttributeMQTTMap AttributeMQTTMap[]
 }
 
 model AttributeMQTTMap {
   id         Int            @id @default(autoincrement())
   path       String
-  attribute  Attribute      @relation(fields: [attributeID], references: [id])
-  connection ConnectionMQTT @relation(fields: [connectionID], references: [id])
+  attribute  Attribute      @relation(fields: [attributeID], references: [id], onDelete: Cascade)
+  connection ConnectionMQTT @relation(fields: [connectionID], references: [id], onDelete: Cascade)
 
   attributeID  Int
   connectionID Int
