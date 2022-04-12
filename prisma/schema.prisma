@@ -18,14 +18,14 @@ model Device {
   description    String?
   location       String?
   connection     String           @default("http")
-  type  Int @default(0)
+  type           Int              @default(0)
   ownerID        Int
   owner          User             @relation(fields: [ownerID], references: [id], onDelete: Cascade)
   telemetry      Telemetry[]
   attributes     Attribute[]
   ConnectionMQTT ConnectionMQTT?
+  ConnectionHTTP ConnectionHTTP[]
 }
-
 
 model User {
   id       Int      @id @default(autoincrement())
@@ -62,9 +62,16 @@ model ConnectionMQTT {
   clientID         String
   username         String?
   password         String?
-  deviceID         Int
+  deviceID         Int                @unique
   device           Device             @relation(fields: [deviceID], references: [id], onDelete: Cascade)
   AttributeMQTTMap AttributeMQTTMap[]
+}
+
+model ConnectionHTTP {
+  id           Int    @id @default(autoincrement())
+  access_token String
+  deviceID     Int
+  device       Device @relation(fields: [deviceID], references: [id], onDelete: Cascade)
 }
 
 model AttributeMQTTMap {
