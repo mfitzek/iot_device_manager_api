@@ -47,7 +47,8 @@ router.post("/login", async (req, res, next)=>{
                 email: user.email,
                 username: user.username,
                 token: token,
-                expires_at: expires_at
+                expires_at: expires_at,
+                role: user.role
             });
 
         }else{
