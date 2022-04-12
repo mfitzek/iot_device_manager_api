@@ -24,7 +24,7 @@ model Device {
   telemetry      Telemetry[]
   attributes     Attribute[]
   ConnectionMQTT ConnectionMQTT?
-  ConnectionHTTP ConnectionHTTP[]
+  ConnectionHTTP ConnectionHTTP?
 }
 
 model User {

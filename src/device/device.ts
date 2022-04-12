@@ -75,10 +75,16 @@ export interface IConnectionMQTT {
 
 }
 
+export interface IConnectionHTTP {
+    id?: number,
+    access_token: string
+}
+
 export interface IConnection {
 
     type: ConnectionType,
     mqtt: IConnectionMQTT | null,
+    http: IConnectionHTTP | null
 
 }
 
@@ -118,7 +124,8 @@ export class Device {
 
         this.connection = {
             type: data.connection,
-            mqtt: null
+            mqtt: null,
+            http: null
         }
 
         // this.attributes = data.attributes;
@@ -138,7 +145,8 @@ export class Device {
                     include: {
                         AttributeMQTTMap: true
                     }
-                }
+                },
+                ConnectionHTTP: true
             }
         });
 
@@ -164,7 +172,17 @@ export class Device {
                     attributes_map: data.ConnectionMQTT.AttributeMQTTMap
                 }
             }
+            
+            if(data.ConnectionHTTP){
+                this.connection.http = {
+                    id: data.ConnectionHTTP.id,
+                    access_token: data.ConnectionHTTP.access_token
+                }
+            }
+
             this.loaded = true;
+
+
         }
 
     }

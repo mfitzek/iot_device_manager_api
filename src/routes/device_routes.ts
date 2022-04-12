@@ -14,6 +14,8 @@ router.post("/", controller.Insert);
 router.get("/attributes", controller.ListDeviceAttributes);
 router.get("/telemetry", controller.Telemetry );
 
+
+
 router.use("/:device_id/", controller.CheckDeviceOwner);
 router.get("/:device_id", controller.Get);
 router.patch("/:device_id", controller.Update);
