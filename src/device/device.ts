@@ -1,5 +1,6 @@
 import Database from "@/db/database";
 import { Gateway } from "@/gateway/gateway"
+import { randomUUID } from "crypto";
 
 export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";
@@ -355,13 +356,19 @@ export class Device {
 
         if(data.type == "http"){
 
-            await database.device.update({
+            const dev = await database.device.update({
                 where:{
                     id: this.id,
                 },data:{
                     connection: "http"
+                },include: {
+                    ConnectionHTTP: true
                 }
             });
+
+            if(!dev.ConnectionHTTP){
+                await this.refresh_http_token();
+            }
 
 
             await this.fetch_data();
@@ -444,6 +451,32 @@ export class Device {
         await database.$transaction(transactions);
 
         await this.fetch_data();
+    }
+
+    async refresh_http_token(){
+        const uid = randomUUID();
+
+        await database.device.update({
+            where: {
+                id: this.id!
+            },
+            data: {
+                ConnectionHTTP: {
+                    upsert: {
+                        update: {
+                            access_token: uid
+                        },
+                        create: {
+                            access_token: uid
+                        }
+                    },
+                    
+                }
+            }
+        });
+
+        await this.fetch_data();
+
     }
 
 

@@ -1,4 +1,5 @@
 import { Device } from "@device/device";
+import { HttpGateway } from "./http_gw";
 import { MqttGateway } from "./mqtt_gw";
 
 
@@ -29,11 +30,13 @@ export class Gateway implements IGateway {
     devices: Device[] = [];
 
     mqtt_gw: MqttGateway;
+    http_gw: HttpGateway;
 
     private static _instance: Gateway;
 
     private constructor(){
         this.mqtt_gw = new MqttGateway();
+        this.http_gw = new HttpGateway();
     }
 
     static getInstance(): Gateway{
@@ -54,6 +57,13 @@ export class Gateway implements IGateway {
                     this.devices.push(dev);
                     return true;
                 }
+                break;
+            case "http":
+                await this.http_gw.connect_device(dev);
+                this.devices.push(dev);
+                return true;
+                break;
+            
         }
 
         return false;
@@ -63,6 +73,7 @@ export class Gateway implements IGateway {
     async remove_device(dev: Device) {
         
         this.mqtt_gw.remove_device(dev);
+        this.http_gw.remove_device(dev);
 
         const idx = this.devices.indexOf(dev);
 

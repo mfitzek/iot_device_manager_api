@@ -184,6 +184,16 @@ const DeviceController = {
         
         res.json(detail);
     },
+
+
+    async ConnectionHttpRefreshToken(req: Request, res: Response, next: NextFunction){
+        const {device_id} = req.params;
+        const device = devices.GetDevice(Number(device_id));
+        await device?.refresh_http_token();
+        const detail = await device?.detail();
+        
+        res.json(detail);
+    }
 };
 
 export default DeviceController;
