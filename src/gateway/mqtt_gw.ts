@@ -54,8 +54,9 @@ export class MqttGateway implements IMqttGateway{
 
             client.on("message", (topic, msg)=>{
                 const topics = connection.attributes_map.filter(attr => match(attr.path, topic));
-                for(const topic of topics){
-                    dev.add_telemetry(topic.attributeID, msg.toString());
+                for(const top of topics){
+                    console.log(`GW telemetry (MQTT), dev: ${dev.id}, topic: ${topic}`);
+                    dev.add_telemetry(top.attributeID, msg.toString());
                 }
             });
 

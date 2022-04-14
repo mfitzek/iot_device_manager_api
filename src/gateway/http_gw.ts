@@ -19,6 +19,8 @@ export class HttpGateway implements IGateway{
 
     async telemetry(device_id: number, access_token: string, data: IData[]){
 
+        console.log(`GW telemtry(HTTP): dev:${device_id}, token: ${access_token}, data_length: ${data.length}`);
+
         const dev = this.devices.find(d=>d.id == device_id);
         const detail = await dev?.detail();
         const dev_token = detail?.connection.http?.access_token;
@@ -28,8 +30,8 @@ export class HttpGateway implements IGateway{
             for(const d of data){
                 const attr = detail.attributes.find(a=>a.name === d.name);
 
-                if(attr){
-                    dev.add_telemetry(attr.id!, d.value);
+                if(attr && attr.id){
+                    dev.add_telemetry(attr.id, d.value);
                 }
 
             }
