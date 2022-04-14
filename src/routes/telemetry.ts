@@ -20,11 +20,17 @@ router.post("/:device_id", async (req: Request, res: Response)=>{
             attr.push({name: x, value: req.body[x]});
         }
 
-        device_manager.gateway.http_gw.telemetry(Number(device_id), access_token, attr);
+        const ok = await device_manager.gateway.http_gw.telemetry(Number(device_id), access_token, attr);
+
+        if(ok){
+           return res.send("OK");
+        }else{
+            return res.status(400).send("Bad access_token");
+        }
        
     }
 
-    res.status(400);
+    return res.status(400).send("Missing device id or access_token");
     
 
 
