@@ -113,6 +113,7 @@ const DeviceController = {
         const owner = req.user?.user_id;
         const device_id = Number(req.params["device_id"]);
 
+
         if(!owner){
             return  res.status(401).send("Please log in");
         }

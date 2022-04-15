@@ -55,7 +55,7 @@ export async function signToken(user: UserToken){
 
 
 
-export function requireAuth(min_level = 2){
+export function requireAuth(min_level = 0){
     return function(req: Request, res: Response, next: NextFunction){
         if(req.user){
             if(req.user.role < min_level){
