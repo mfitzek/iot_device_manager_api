@@ -4,6 +4,7 @@ import { IAttribute, IConnection, IDeviceAttributes, IDeviceData, IDeviceShort }
 
 import device_manager from "@/device/device_manager";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { to_csv, to_json, to_xml } from "@/device/telemetry/data_export";
 
 const devices = device_manager;
 
@@ -27,6 +28,8 @@ const DeviceController = {
         //const { device_id } = req.params;
         const { attr, date_start, date_end } = req.query;
 
+        const owner_id = Number(req.user?.user_id);
+
         const attributes: number[] = [];
 
         if (Array.isArray(attr)) {
@@ -41,11 +44,57 @@ const DeviceController = {
         const start = date_start ? new Date(String(date_start)) : new Date(0);
 
 
-        const telemetry = await devices.DeviceTelemetry(attributes, start, end);
+        const telemetry = await devices.TelemetryList(owner_id, attributes, start, end);
 
         // res.send("ok");
         res.json(telemetry);
     },
+
+    async ExportTelemetry(req: Request, res: Response, next: NextFunction) {
+        //const { device_id } = req.params;
+        const { attr, date_start, date_end } = req.query;
+
+        const owner_id = Number(req.user?.user_id);
+
+        const attributes: number[] = [];
+
+        if (Array.isArray(attr)) {
+            for (const a of attr) {
+                attributes.push(Number(a));
+            }
+        } else if (attr) {
+            attributes.push(Number(attr));
+        }
+
+        const end = date_end ? new Date(String(date_end)) : new Date();
+        const start = date_start ? new Date(String(date_start)) : new Date(0);
+
+
+        const telemetry = await devices.TelemetryList(owner_id, attributes, start, end);
+
+
+        const {format} = req.params;
+
+
+
+        if(format == "xml"){
+            const parsed = to_xml(telemetry);
+            res.set('Content-Type', 'text/xml');
+            res.send(parsed);
+        }else if(format=="csv") {
+            res.set('Content-Type', 'text/csv');
+            res.send(to_csv(telemetry));
+        }else{
+            res.json(to_json(telemetry));
+        }
+
+        
+
+
+        // res.send("ok");
+
+    },
+
 
     async List(req: Request, res: Response, next: NextFunction) {
         const user_id = req.user!.user_id;

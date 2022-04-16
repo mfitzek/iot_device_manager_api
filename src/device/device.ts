@@ -18,7 +18,7 @@ export enum DeviceType{
 export interface IDeviceAttributes {
     id: number,
     name: string,
-    attributes: IAttribute[]
+    attributes: IAttribute[],
 }
 
 
@@ -53,7 +53,8 @@ export interface IAttribute {
 
     id?: number,
     name: string,
-    type: AttributeType
+    type: AttributeType,
+    telemetry?: ITelemetry[]
 
 }
 

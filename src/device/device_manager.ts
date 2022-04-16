@@ -3,7 +3,7 @@ import Database from "@/db/database";
 import { Gateway } from "@/gateway/gateway"
 
 import { PrismaClient } from "@prisma/client";
-import {  Device, ConnectionType, IConnection, IDeviceShort, IDeviceAttributes, AttributeType } from "./device";
+import {  Device, ConnectionType, ITelemetry, IDeviceShort, IDeviceAttributes, AttributeType, IAttribute } from "./device";
 import { DeviceFactory } from "./device_factory";
 
 
@@ -120,8 +120,6 @@ class DeviceManager{
 
 
     async DeviceTelemetry(attributes: number[], start: Date, end: Date){
-
-        
         if(attributes.length > 0){
             return await this.database.attribute.findMany({
                 where: {
@@ -141,7 +139,58 @@ class DeviceManager{
                 }
             });
         }
+    }
 
+    async TelemetryList(owner_id: number, attributes: number[], start: Date, end: Date){
+        if(attributes.length > 0){
+
+            const data =  await this.database.device.findMany({
+                where: {
+                    ownerID: owner_id
+                },
+                include: {
+                    attributes: {
+                        where: {
+                            id: {
+                                in: attributes
+                            }
+                        },
+                        include: {
+                            Telemetry: {
+                                where:{
+                                    createdAt: {
+                                        gte: start,
+                                        lte: end
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            return data.map((dev):IDeviceAttributes => {
+                return {
+                    id: dev.id,
+                    name: dev.name,
+                    attributes: dev.attributes.map((attr): IAttribute =>{
+                        return {
+                            id: attr.id,
+                            name: attr.name,
+                            type: attr.type as AttributeType,
+                            telemetry: attr.Telemetry.map((tel):ITelemetry=>{
+                                return {
+                                    deviceID: tel.deviceID,
+                                    attributeID: tel.attributeID,
+                                    createdAt: new Date(tel.createdAt),
+                                    value: tel.value
+                                }
+                            })
+                        }
+                    })
+                }
+            });
+        }
+        return [];
     }
 
     async ConnectDevices(){
