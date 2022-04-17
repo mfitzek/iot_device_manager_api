@@ -140,3 +140,5 @@ prisma/**
 
 
 backup/*
+
+.vscode/
