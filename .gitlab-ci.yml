@@ -1,0 +1,35 @@
+image: node:latest
+
+cache:
+  paths:
+    - node_modules/
+
+stages:
+  - install_dependencies
+  - test
+  - build
+  - deploy
+
+
+dependencies:
+  stage: install_dependencies
+  script:
+    - npm install
+
+tsc:
+  stage: test
+  script:
+    - npm install
+    - npx tsc --noEmit
+
+eslint:
+  stage: test
+  script:
+    - npm install
+    - npx eslint src/
+
+
+
+
+
+
