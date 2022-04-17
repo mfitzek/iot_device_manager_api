@@ -28,7 +28,15 @@ eslint:
     - npm install
     - npx eslint src/
 
-
+npm_audit:
+  stage: test
+  script:
+    - npm install
+    - npm audit --json | npx @codejedi365/gitlab-npm-audit-parser -o
+      gl-dependency-scanning.json
+  artifacts:
+    reports:
+      dependency_scanning: gl-dependency-scanning.json
 
 
 
