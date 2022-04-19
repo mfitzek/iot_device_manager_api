@@ -118,6 +118,12 @@ class TelemetryCache {
             });
         }));
     }
+
+
+    current_cache(){
+        return this.primary? this.primary_cache : this.secondary_cache;
+    }
+
 }
 
 

@@ -7,6 +7,9 @@ import {  Device, ConnectionType, ITelemetry, IDeviceShort, IDeviceAttributes, A
 import { DeviceFactory } from "./device_factory";
 
 
+import TelemetryCache from "./telemetry/cache";
+
+
 
 class DeviceManager{
 
@@ -145,7 +148,7 @@ class DeviceManager{
                     }
                 }
             });
-            return data.map((dev):IDeviceAttributes => {
+            const mapped = data.map((dev):IDeviceAttributes => {
                 return {
                     id: dev.id,
                     name: dev.name,
@@ -166,6 +169,17 @@ class DeviceManager{
                     })
                 }
             });
+
+            for(const m of mapped){
+                const cached_telemetry = TelemetryCache.current_cache().filter(tel=>tel.deviceID == m.id);
+                for(const attr of m.attributes){
+                    const attr_telemetry = cached_telemetry.filter(tel=>tel.attributeID == attr.id);
+                    attr.telemetry?.push(...attr_telemetry);
+                }
+            }
+
+
+            return mapped;
         }
         return [];
     }
