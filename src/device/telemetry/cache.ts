@@ -12,6 +12,7 @@ const database = Database.Instance.prisma;
 const max_cap = 10000;
 const max_time = 15*60*1000 // 15 minutes
 
+
 class TelemetryCache {
     
     max_capacity: number;

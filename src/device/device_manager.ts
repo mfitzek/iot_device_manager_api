@@ -171,7 +171,7 @@ class DeviceManager{
             });
 
             for(const m of mapped){
-                const cached_telemetry = TelemetryCache.current_cache().filter(tel=>tel.deviceID == m.id);
+                const cached_telemetry = TelemetryCache.current_cache().filter(tel=>tel.deviceID == m.id && tel.createdAt && tel.createdAt >= start && tel.createdAt <= end);
                 for(const attr of m.attributes){
                     const attr_telemetry = cached_telemetry.filter(tel=>tel.attributeID == attr.id);
                     attr.telemetry?.push(...attr_telemetry);
