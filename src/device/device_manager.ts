@@ -118,29 +118,6 @@ class DeviceManager{
     }
 
 
-
-    async DeviceTelemetry(attributes: number[], start: Date, end: Date){
-        if(attributes.length > 0){
-            return await this.database.attribute.findMany({
-                where: {
-                    id: {
-                        in: attributes
-                    },
-                },
-                include: {
-                    Telemetry: {
-                        where:{
-                            createdAt: {
-                                gte: start,
-                                lte: end
-                            },
-                        }
-                    }
-                }
-            });
-        }
-    }
-
     async TelemetryList(owner_id: number, attributes: number[], start: Date, end: Date){
         if(attributes.length > 0){
 

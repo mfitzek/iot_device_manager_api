@@ -1,6 +1,9 @@
 import Database from "@/db/database";
 import { Gateway } from "@/gateway/gateway"
 import { randomUUID } from "crypto";
+import TelemetryCache from "./telemetry/cache";
+
+
 
 export type ConnectionType = "mqtt" | "http";
 export type AttributeType = "number" | "string" | "object";
@@ -30,7 +33,9 @@ export interface IDeviceShort {
     location: string | null,
     description: string | null,
     type: DeviceType,
-    connection: ConnectionType
+    connection: ConnectionType,
+    last_telemetry: Date | null,
+    online: boolean
 }
 
 
@@ -43,6 +48,8 @@ export interface IDeviceData {
     location: string | null,
     description: string | null,
     type: DeviceType,
+    last_telemetry: Date | null,
+    online: boolean
 
     connection: IConnection,
     attributes: IAttribute[],
@@ -116,6 +123,10 @@ export class Device {
     private connection: IConnection;
     private attributes: IAttribute[] = [];
     private type: DeviceType;
+
+    public online = false;
+    public last_telemetry: Date | null = null;
+
 
     constructor(data: IDeviceShort){
         this.id = data.id;
@@ -197,7 +208,9 @@ export class Device {
             description: this.description,
             type: this.type,
             location: this.location,
-            connection: this.connection.type
+            connection: this.connection.type,
+            last_telemetry: this.last_telemetry,
+            online: this.online
         }
         return data;
     }
@@ -215,7 +228,9 @@ export class Device {
             location: this.location,
             type: this.type,
             attributes: this.attributes,
-            connection: this.connection
+            connection: this.connection,
+            last_telemetry: this.last_telemetry,
+            online: this.online
         }
         return data;
     }
@@ -313,6 +328,10 @@ export class Device {
         if(!this.loaded){
             await this.fetch_data(); 
         }
+        const telemetry_date = new Date();
+        this.online = true;
+        this.last_telemetry = new Date();
+        
 
 
         const attr = this.attributes.find(a=>a.id == attribute_id);
@@ -333,12 +352,11 @@ export class Device {
                 return null;
             }
 
-            const data = await database.telemetry.create({
-                data: {
-                    deviceID: this.id!,
-                    value: JSON.stringify(converted),
-                    attributeID: attribute_id,
-                }
+            const data = await TelemetryCache.push({
+                deviceID: this.id!,
+                value: JSON.stringify(converted),
+                attributeID: attribute_id,
+                createdAt: telemetry_date
             });
 
             return data;
