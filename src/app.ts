@@ -7,7 +7,6 @@ import morgan from "morgan";
 
 import routes from "./routes/index_routes"
 
-import device_manager from "./device/device_manager";
 
 import cors from "cors";
 
@@ -23,8 +22,6 @@ app.use(express.urlencoded({extended: true}))
 
 app.use(routes);
 
-
-// device_manager.InitManager();
 
 export default app;
 

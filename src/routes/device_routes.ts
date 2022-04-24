@@ -1,5 +1,5 @@
 
-import { NextFunction, Router, Request, Response } from "express";
+import { Router } from "express";
 
 import controller from "../controllers/device_controller";
 

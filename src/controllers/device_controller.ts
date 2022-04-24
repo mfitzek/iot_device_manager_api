@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import Database from "@db/database";
-import { IAttribute, IConnection, IDeviceAttributes, IDeviceData, IDeviceShort } from "@/device/device";
+import {  IConnection,  IDeviceShort } from "@/device/device";
 
 import device_manager from "@/device/device_manager";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { to_csv, to_json, to_xml } from "@/device/telemetry/data_export";
 
 const devices = device_manager;
