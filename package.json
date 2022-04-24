@@ -5,8 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc && tsc-alias",
-    "dev:init": "npx prisma migrate dev --name init",
-    "dev:db_generate": "npx prisma generate",
+    "create_db": "prisma generate && prisma db push",
+    "dev:init": "prisma migrate dev --name init",
+    "dev:db_generate": "prisma generate",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:server": "nodemon --watch './**/*.ts' --exec ts-node ./src/index.ts"
