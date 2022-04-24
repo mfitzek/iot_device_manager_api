@@ -34,8 +34,8 @@ export interface IDeviceShort {
     description: string | null,
     type: DeviceType,
     connection: ConnectionType,
-    last_telemetry: Date | null,
-    online: boolean
+    last_telemetry?: Date | null,
+    online?: boolean
 }
 
 
