@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:lts-slim
 
  
 ENV DATABASE_URL "file:database.db"
@@ -6,7 +6,7 @@ ENV DATABASE_URL "file:database.db"
 # ENV JWT_EXPIRES_IN "8h"
 
 RUN apt update
-RUN apt install sqlite3
+RUN apt install -y sqlite3 openssl
 
 
 WORKDIR /iot_data_storage
@@ -14,7 +14,10 @@ COPY . .
 
 RUN npm install
 
-RUN npx prisma migrate deploy
+
+RUN npx prisma generate
+RUN npx prisma db push
+
 
 RUN npm run build
 

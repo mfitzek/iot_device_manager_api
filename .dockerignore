@@ -1,0 +1,7 @@
+.vscode/
+dist/
+node_modules
+backup/**
+prisma/**
+!prisma/schema.prisma
+
