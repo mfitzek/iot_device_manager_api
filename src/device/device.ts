@@ -236,14 +236,25 @@ export class Device {
     }
 
     async insert(){
+        const detail = this.short_detail();
+
+        delete detail.last_telemetry;
+        delete detail.online;
+
         const inserted = await database.device.create({
-            data: this.short_detail(),
+            data: detail
         });
         this.id = inserted.id;
         return this.short_detail();
     }
 
     async update(data: IDeviceShort){
+
+        const edited = data;
+
+        delete edited.last_telemetry;
+        delete edited.online;
+
         const dev = await database.device.update({
             where: {
                 id: this.id
